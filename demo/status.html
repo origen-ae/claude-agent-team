@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Project Status Board</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", sans-serif; max-width: 1200px; margin: 20px auto; padding: 20px; background: #f5f6fa; color: #2f3640; }
+  h1 { margin-bottom: 5px; }
+  .meta { color: #718093; font-size: 14px; margin-bottom: 30px; }
+  .summary { display: flex; gap: 20px; margin-bottom: 30px; }
+  .card { flex: 1; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); text-align: center; }
+  .card .num { font-size: 36px; font-weight: bold; }
+  .card .label { color: #718093; margin-top: 5px; }
+  .card.awaiting .num { color: #fbc531; }
+  .card.in-progress .num { color: #0097e6; }
+  .card.done .num { color: #44bd32; }
+  .card.total .num { color: #2f3640; }
+  .section { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+  .section h2 { margin-top: 0; border-bottom: 2px solid #f5f6fa; padding-bottom: 10px; }
+  .req { border-left: 4px solid #dcdde1; padding: 15px; margin-bottom: 15px; background: #fafbfc; border-radius: 0 4px 4px 0; }
+  .req.awaiting { border-left-color: #fbc531; }
+  .req.in-progress { border-left-color: #0097e6; }
+  .req.done { border-left-color: #44bd32; }
+  .req.cancelled { border-left-color: #c23616; opacity: 0.6; }
+  .req-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .req-title { font-weight: bold; font-size: 16px; }
+  .req-stage { padding: 3px 12px; border-radius: 12px; background: #dcdde1; font-size: 12px; }
+  .req-stage.awaiting { background: #fbc531; color: white; }
+  .req-stage.in-progress { background: #0097e6; color: white; }
+  .req-stage.done { background: #44bd32; color: white; }
+  .progress-bar { display: flex; gap: 4px; margin-top: 10px; }
+  .progress-step { flex: 1; height: 30px; background: #ecf0f1; border-radius: 3px; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #7f8c8d; }
+  .progress-step.done { background: #44bd32; color: white; }
+  .progress-step.current { background: #0097e6; color: white; font-weight: bold; }
+  .progress-step.current.awaiting { background: #fbc531; }
+  .progress-step.current.fixing { background: #e74c3c; }
+  .summary-text { color: #57606f; font-size: 14px; margin-top: 8px; }
+  .req-links { margin-top: 10px; font-size: 13px; }
+  .req-links a { color: #0097e6; margin-right: 15px; text-decoration: none; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { padding: 10px; text-align: left; border-bottom: 1px solid #f5f6fa; }
+  th { color: #718093; font-weight: normal; }
+</style>
+</head>
+<body>
+
+<h1>📋 Project Status Board</h1>
+<div class="meta">Last updated: 2026-02-11 19:21:19</div>
+
+<div class="summary">
+  <div class="card total"><div class="num">8</div><div class="label">Total</div></div>
+  <div class="card awaiting"><div class="num">2</div><div class="label">Awaiting</div></div>
+  <div class="card in-progress"><div class="num">3</div><div class="label">In progress</div></div>
+  <div class="card done"><div class="num">2</div><div class="label">Done</div></div>
+</div>
+<div class="section"><h2>🛑 Awaiting your approval</h2><table><tr><th>ID</th><th>Title</th><th>Waiting for</th><th>Waiting since</th></tr><tr><td><strong>PRD-004</strong></td><td>Audit log export</td><td>Awaiting SPEC approval</td><td>2026-02-11</td></tr><tr><td><strong>PRD-006</strong></td><td>In-app notifications</td><td>Awaiting PRD approval</td><td>2026-02-11</td></tr></table></div><div class="section"><h2>📋 Details</h2>
+<div class="req awaiting">
+  <div class="req-header">
+    <div class="req-title">PRD-006: In-app notifications</div>
+    <div class="req-stage awaiting">🟡 Awaiting PRD approval</div>
+  </div>
+  <div class="summary-text">Real-time in-app notification center.</div>
+  <div class="progress-bar"><div class="progress-step done">PM design</div><div class="progress-step current awaiting">PRD approval</div><div class="progress-step ">Architecture</div><div class="progress-step ">SPEC approval</div><div class="progress-step ">Develop</div><div class="progress-step ">Test 1</div><div class="progress-step ">Test 2</div><div class="progress-step ">Deploy approval</div><div class="progress-step ">Deploy</div></div>
+  <div class="req-links">
+<a href="docs\prd\PRD-006.md">📄 PRD</a></div></div>
+<div class="req awaiting">
+  <div class="req-header">
+    <div class="req-title">PRD-004: Audit log export</div>
+    <div class="req-stage awaiting">🟡 Awaiting SPEC approval</div>
+  </div>
+  <div class="summary-text">Export audit logs to CSV/JSON for compliance.</div>
+  <div class="progress-bar"><div class="progress-step done">PM design</div><div class="progress-step done">PRD approval</div><div class="progress-step done">Architecture</div><div class="progress-step current awaiting">SPEC approval</div><div class="progress-step ">Develop</div><div class="progress-step ">Test 1</div><div class="progress-step ">Test 2</div><div class="progress-step ">Deploy approval</div><div class="progress-step ">Deploy</div></div>
+  <div class="req-links">
+<a href="docs\prd\PRD-004.md">📄 PRD</a><a href="docs\spec\SPEC-004.md">⚙️ SPEC</a></div></div>
+<div class="req in-progress">
+  <div class="req-header">
+    <div class="req-title">PRD-003: Team workspaces</div>
+    <div class="req-stage in-progress">🟧 Developing</div>
+  </div>
+  <div class="summary-text">Multi-tenant workspaces with role-based access.</div>
+  <div class="progress-bar"><div class="progress-step done">PM design</div><div class="progress-step done">PRD approval</div><div class="progress-step done">Architecture</div><div class="progress-step done">SPEC approval</div><div class="progress-step current">Develop</div><div class="progress-step ">Test 1</div><div class="progress-step ">Test 2</div><div class="progress-step ">Deploy approval</div><div class="progress-step ">Deploy</div></div>
+  <div class="req-links">
+<a href="docs\prd\PRD-003.md">📄 PRD</a><a href="docs\spec\SPEC-003.md">⚙️ SPEC</a></div></div>
+<div class="req in-progress">
+  <div class="req-header">
+    <div class="req-title">PRD-005: SSO / SAML login</div>
+    <div class="req-stage in-progress">🟨 Testing (round 1)</div>
+  </div>
+  <div class="summary-text">Enterprise SSO via SAML 2.0 identity providers.</div>
+  <div class="progress-bar"><div class="progress-step done">PM design</div><div class="progress-step done">PRD approval</div><div class="progress-step done">Architecture</div><div class="progress-step done">SPEC approval</div><div class="progress-step done">Develop</div><div class="progress-step current">Test 1</div><div class="progress-step ">Test 2</div><div class="progress-step ">Deploy approval</div><div class="progress-step ">Deploy</div></div>
+  <div class="req-links">
+<a href="docs\prd\PRD-005.md">📄 PRD</a><a href="docs\spec\SPEC-005.md">⚙️ SPEC</a><a href="docs\test-plan\TEST-PLAN-005.md">🧪 TEST-PLAN</a></div></div>
+<div class="req in-progress">
+  <div class="req-header">
+    <div class="req-title">PRD-007: Usage analytics dashboard</div>
+    <div class="req-stage in-progress">🔴 Fixing</div>
+  </div>
+  <div class="summary-text">Per-account usage metrics and charts.</div>
+  <div class="progress-bar"><div class="progress-step done">PM design</div><div class="progress-step done">PRD approval</div><div class="progress-step done">Architecture</div><div class="progress-step done">SPEC approval</div><div class="progress-step done">Develop</div><div class="progress-step done">Test 1</div><div class="progress-step ">Test 2</div><div class="progress-step ">Deploy approval</div><div class="progress-step ">Deploy</div></div>
+  <div class="req-links">
+<a href="docs\prd\PRD-007.md">📄 PRD</a><a href="docs\spec\SPEC-007.md">⚙️ SPEC</a><a href="docs\test-plan\TEST-PLAN-007.md">🧪 TEST-PLAN</a></div></div>
+<div class="req done">
+  <div class="req-header">
+    <div class="req-title">PRD-001: User onboarding flow</div>
+    <div class="req-stage done">✅ Deployed</div>
+  </div>
+  <div class="summary-text">Guided first-run onboarding with progress checklist.</div>
+  <div class="progress-bar"><div class="progress-step done">PM design</div><div class="progress-step done">PRD approval</div><div class="progress-step done">Architecture</div><div class="progress-step done">SPEC approval</div><div class="progress-step done">Develop</div><div class="progress-step done">Test 1</div><div class="progress-step done">Test 2</div><div class="progress-step done">Deploy approval</div><div class="progress-step done">Deploy</div></div>
+  <div class="req-links">
+<a href="docs\prd\PRD-001.md">📄 PRD</a></div></div>
+<div class="req done">
+  <div class="req-header">
+    <div class="req-title">PRD-002: Stripe billing integration</div>
+    <div class="req-stage done">✅ Deployed</div>
+  </div>
+  <div class="summary-text">Subscription billing and invoices via Stripe.</div>
+  <div class="progress-bar"><div class="progress-step done">PM design</div><div class="progress-step done">PRD approval</div><div class="progress-step done">Architecture</div><div class="progress-step done">SPEC approval</div><div class="progress-step done">Develop</div><div class="progress-step done">Test 1</div><div class="progress-step done">Test 2</div><div class="progress-step done">Deploy approval</div><div class="progress-step done">Deploy</div></div>
+  <div class="req-links">
+<a href="docs\prd\PRD-002.md">📄 PRD</a></div></div>
+<div class="req cancelled">
+  <div class="req-header">
+    <div class="req-title">PRD-008: Legacy API v1 sunset</div>
+    <div class="req-stage cancelled">❌ Cancelled</div>
+  </div>
+  <div class="summary-text">Deprecate and remove the v1 REST API.</div>
+  <div class="progress-bar"><div class="progress-step done">PM design</div><div class="progress-step done">PRD approval</div><div class="progress-step done">Architecture</div><div class="progress-step done">SPEC approval</div><div class="progress-step done">Develop</div><div class="progress-step done">Test 1</div><div class="progress-step done">Test 2</div><div class="progress-step done">Deploy approval</div><div class="progress-step done">Deploy</div></div>
+  <div class="req-links">
+<a href="docs\prd\PRD-008.md">📄 PRD</a></div></div></div></body></html>

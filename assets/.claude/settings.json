@@ -1,0 +1,29 @@
+{
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  },
+  "permissions": {
+    "deny": [
+      "Read(.env*)",
+      "Read(**/.git/**)",
+      "Write(.git/**)",
+      "Bash(rm -rf*)",
+      "Bash(git push --force*)"
+    ]
+  },
+  "teammateMode": "auto",
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "pathMatcher": "docs/**/*.md",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python scripts/build_status.py 2>/dev/null || true"
+          }
+        ]
+      }
+    ]
+  }
+}

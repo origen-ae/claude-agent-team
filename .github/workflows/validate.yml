@@ -1,0 +1,55 @@
+name: validate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r assets/scripts/requirements.txt
+
+      - name: Compile dashboard scripts
+        run: python -m py_compile assets/scripts/*.py
+
+      - name: Validate settings.json
+        run: python -c "import json; json.load(open('assets/.claude/settings.json', encoding='utf-8')); print('settings.json is valid JSON')"
+
+      - name: Validate document frontmatter
+        run: |
+          python - <<'PY'
+          import glob, sys, frontmatter
+
+          files = (
+              glob.glob('assets/.claude/agents/*.md')
+              + glob.glob('assets/.claude/skills/*/SKILL.md')
+              + glob.glob('assets/docs/_templates/*.md')
+              + glob.glob('assets/docs/adr/*.md')
+              + glob.glob('examples/**/docs/**/*.md', recursive=True)
+              + ['SKILL.md']
+          )
+          bad = []
+          for f in sorted(set(files)):
+              try:
+                  meta = frontmatter.load(f).metadata
+                  if not meta:
+                      bad.append((f, 'empty frontmatter'))
+              except Exception as e:
+                  bad.append((f, str(e)))
+
+          print(f'checked {len(set(files))} files')
+          if bad:
+              for f, e in bad:
+                  print(f'FAIL  {f}  ->  {e}')
+              sys.exit(1)
+          print('all frontmatter valid')
+          PY
