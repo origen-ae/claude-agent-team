@@ -1,5 +1,7 @@
 # Project Collaboration Conventions
 
+<!-- claude-agent-team: v1.3.0 — do not remove; upgrades use this to detect the installed version -->
+
 ## Project Status (filled in by the architect after first launch)
 
 > **Important**: Every agent, when it picks up a task, must:
@@ -25,6 +27,8 @@
 
 Enabling agent teams: `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` is already set in `.claude/settings.json`.
 
+**Fallback when agent teams / SendMessage are unavailable.** This is an experimental feature; on a Claude Code version that lacks it, inter-agent `SendMessage` won't work and the flow would otherwise stall silently. In that case the **orchestrator (main Claude) acts as the router**: it invokes each role with the Task/subagent tool, reads that agent's output itself, and dispatches the next stage manually instead of relying on agent-to-agent messages. The `stage` field in frontmatter remains the source of truth either way, so the document flow is identical — only the handoff mechanism changes. If handoffs seem to vanish, assume the feature is off and switch to router mode.
+
 ### New Features Go Through pm (not generic brainstorming)
 
 When the user starts a new feature, dispatch the **pm** agent first. Do **not** trigger a generic brainstorming/planning skill (e.g. `superpowers:brainstorming`) for feature work — its terminal state writes a plan that bypasses the PRD → SPEC → approval flow. The pm owns requirement shaping (it has its own lightweight brainstorming for L-tier work) and ends by writing a PRD. (User instructions outrank skill triggers.)
@@ -39,11 +43,15 @@ Not every change needs the full 8 stages. Classify the work first, then pick the
 | **M — medium** | single feature extension, backend change with no API-contract change, one new interaction | pm writes a short note → dev implements → qa smoke test | optional light PRD (no SPEC) |
 | **L — large** | new page/module, cross-layer or API change, DB schema change, affects multiple agents | full 8-stage flow below, all 3 approval gates active | full PRD + SPEC + TEST-PLAN |
 
-Rule of thumb: only one file's internals change, no API change → **S**; an API changes but not the schema, ≤ 2 files → **M**; DB schema changes / a new API route / multiple subsystems touched → **L**. The agent classifies the tier first; **S never needs pm or architect**.
+Rule of thumb: only one file's internals change, no API change → **S**; an API changes but not the schema, ≤ 2 files → **M**; DB schema changes / a new API route / multiple subsystems touched → **L**.
+
+**Who classifies, and when.** The **orchestrator (main Claude) classifies at intake**, before dispatching any agent — this is the one decision that precedes the pm-first rule. When in doubt, classify **up** (the cost of an unnecessary PRD is small; the cost of a skipped gate on a schema change is large).
+
+**Escalation is mandatory and the boundary is not one-way.** If an S or M change turns out, mid-flight, to touch a DB schema, add or change an API route, or reach into a second subsystem, the agent **must stop, re-classify up, and re-enter the flow at the matching gate** (don't finish it as S just because it started as S). The **reviewer is the backstop**: if a review of an S/M change shows an API-contract or schema change, the reviewer flags `tier-escalation` and the change does not merge until it has gone through the right gate.
 
 **S-tier testing**: the existing suite must still pass; if you touch core logic (shared utilities, data processing, common components), add a unit test covering the change.
 
-The 8-stage flow below applies in full to **L**. **M** uses a trimmed version (a short PRD, no formal SPEC or approval gates); **S** skips it entirely.
+The 8-stage flow below applies in full to **L**. **M** uses a trimmed version: a short PRD and **one** lightweight checkpoint — the user OKs the short note before dev starts — but no formal SPEC and no separate ship gate. **S** skips the flow entirely.
 
 ## Development Flow (strictly serial, 8 stages)
 
@@ -61,17 +69,45 @@ The 8-stage flow below applies in full to **L**. **M** uses a trimmed version (a
 6. Fixing           - dev fixes issues found in round 1 (if any)
    ↓
 7. Testing round 2  - qa runs automated regression + verifies fixes
-   ↓ 🛑 User approves deployment
-8. Deployed         - Mark as complete
+   ↓ 🛑 User approves shipping
+8. Done             - Approved & ready to merge/ship (see "Scope boundary" below)
 ```
+
+### Scope boundary (what "Done" means)
+
+This team takes a requirement from idea to **approved, tested, merge-ready code**. The terminal stage is still keyed `deployed` in frontmatter (for backward compatibility), but it means **"done — approved and ready to ship"**, *not* "running in production".
+
+**Out of scope — these stay yours:** running CI/CD, building artifacts, deploying to environments (dev/staging/prod), database migration execution, monitoring/alerting, and production rollback. The `backend`'s migration + rollback scripts and the `RUNBOOK` are produced as deliverables but are **not executed** by any stage. If you want a release gate, wire your own CI to run the test suite on the PR and treat a green run as part of the ship approval.
 
 ### Mandatory Human Approval Gates
 
 - **🛑 Stage 2 → 3**: User approves the PRD (are the features, prototype, and flow all OK?)
 - **🛑 Stage 3 → 4**: User approves the SPEC (is the technical design OK?)
-- **🛑 Stage 7 → 8**: User approves deployment (is it ready to ship?)
+- **🛑 Stage 7 → 8**: User approves shipping (is the code ready to merge/ship?)
 
 At these gates the agent stops and waits; it does not advance automatically.
+
+**The agent must not silently end its turn while waiting.** When it reaches a gate (or has to wait on another agent), it states plainly what it is waiting for and what it needs from you, in the same turn — so a wait is never indistinguishable from an abandoned task.
+
+**Approval is recorded, not just spoken.** When you approve, the responsible agent sets `approved-by: <your name or "user">` in the document frontmatter before advancing. This makes the gate auditable on the board.
+
+### Definition of Ready / Definition of Done (gate checklists)
+
+The agent presenting a gate states which items are met; the user uses them to approve deliberately rather than rubber-stamp a 200-line document.
+
+**DoR — before pm moves a PRD to `awaiting-prd-approval`:**
+- [ ] Target user, pain point, and success metric are stated
+- [ ] Every acceptance criterion is testable
+- [ ] Every Non-goal has a matching `BACKLOG-NNN` entry
+- [ ] Prototype flags the E2E key points
+
+**DoD — before the ship gate (`awaiting-deploy-approval`):**
+- [ ] Every PRD acceptance criterion maps to a passing test
+- [ ] `python scripts/check_state.py` reports no errors
+- [ ] TEST-PLAN round-2 results are filled in and green
+- [ ] Reviewer raised no unresolved Critical findings
+- [ ] Backend: migration + rollback scripts present (if schema changed)
+- [ ] SPEC-000 update is queued (architect applies it once shipped)
 
 ### Approval Gates Are Loops, Not One-Way Doors
 
@@ -100,10 +136,15 @@ Communicate directly via SendMessage, without routing through the lead:
 After an agent finishes its stage task, it **must**:
 
 1. Update the stage field in the frontmatter of the corresponding document
-2. Run `python scripts/build_status.py` to rebuild STATUS.md
+2. Confirm STATUS refreshed — the PostToolUse hook reruns `scripts/refresh_status.py` automatically on any `docs/**/*.md` edit; only run `python scripts/build_status.py` by hand if the hook didn't fire
 3. Notify the agent for the next stage via SendMessage (or pm, for approval)
 
-**Additional action at `deployed`**: the architect must update `docs/spec/SPEC-000-current-state.md` — append new APIs, data model changes, and module updates introduced by this PRD. SPEC-000 is the single source of truth for the overall system architecture and must stay current.
+**Stage 4 → 5 handoff (the parallel-dev join).** frontend and backend run in parallel, so neither may unilaterally hand off to qa. Rules:
+- The dev who finishes **first** sets its own `frontend-done: true` / `backend-done: true` flag and notifies the other — it does **not** advance the stage or call qa.
+- The dev who finishes **second** verifies both flags are true, sets the PRD stage to `testing-round1`, and only then notifies qa.
+- qa does not start round 1 until **both** flags are true. If only one is set, qa pings the missing dev rather than testing a half-built feature.
+
+**Additional action at `deployed` (= done):** the architect updates `docs/spec/SPEC-000-current-state.md` — append new APIs, data model changes, and module updates introduced by this PRD. SPEC-000 is the single source of truth for the overall system architecture and must stay current. (In multi-developer mode this happens on the **integration branch after merge**, not on each feature branch — see "Multi-Developer Mode".)
 
 ## Document System
 
@@ -173,7 +214,9 @@ summary: One-line summary (< 100 chars)
 ---
 ```
 
-Optional: `related`, `tags`, `module`, `priority`, `cancelled-reason`, `supersedes`, `superseded-by`.
+Optional: `related`, `tags`, `module`, `priority`, `cancelled-reason`, `supersedes`, `superseded-by`, `approved-by`.
+
+`approved-by` records who signed off at a gate (set by the responsible agent when the user approves) — keeps the approval auditable.
 
 Cross-PRD supersession fields:
 - `supersedes: [PRD-003, PRD-005]` — add to the **new** PRD that replaces earlier ones
@@ -257,13 +300,43 @@ For every commit that involves a document stage change, **you must also run buil
 
 ## Multi-Developer Mode (optional)
 
-For teams, run one feature branch per person; the branch name is the owner identity.
+When several people work the **same project**, each running their own agent team in their own environment, the single-user flow needs extra coordination — otherwise generated files, ID numbers, and the SPEC-000 baseline all collide at merge time. Run one feature branch per person; the branch name is that person's identity.
 
-- Develop on `feature/<name>`; open a PR into your integration branch (e.g. `develop`).
-- **PR review doubles as the approval gates**: the PRD in the PR description is approved on the PR; likewise the SPEC; merging is the deploy approval.
-- PRD frontmatter records `owner: feature/<name>` (the value of `git branch --show-current`).
-- Rebuild `STATUS.md` only on the shared branch; feature branches don't commit it.
-- For a large feature, claim the PRD number on the shared branch first (append a reserved entry to `docs/index.yaml`), then write the PRD on your feature branch — this prevents number collisions.
+### Setup: `.claude/` is committed, shared truth (not per-person installs)
+
+Scaffold **once**, commit the whole `.claude/` directory (agents, skills, `settings.json`, `CLAUDE.md`) plus `scripts/` and `docs/_templates/` to the repo, and have everyone pull it. Do **not** have each person `/plugin install` independently — that drifts agent definitions, the process contract, and scripts across environments so the "same" project behaves differently per person. The committed copy is the source of truth; upgrade it in one PR.
+
+Each environment still needs `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` and a Claude Code version that supports agent teams (else see the router fallback above).
+
+### Generated files are build artifacts — don't commit them from feature branches
+
+`status.html` and `docs/index.yaml` are pure derived output; **gitignore them** (see the `.gitignore` snippet in README). `STATUS.md` may be committed for GitHub viewing, but **only the integration branch regenerates and commits it** — feature branches let the hook refresh it locally but must not commit it (it's a guaranteed merge conflict otherwise). Treat all three as regenerable: `python scripts/build_index.py && python scripts/build_status.py`.
+
+### Claim ID numbers on the shared branch before branching
+
+"Highest ID + 1" is computed locally, so two people will pick the same `PRD-009` on separate branches and collide on merge. Protocol:
+
+1. On the integration branch, run `python scripts/next_id.py prd` (also `spec` / `backlog` / `adr`) to get the next free number — it scans both files and `docs/index.yaml` reservations.
+2. Reserve it: add a stub entry to `docs/index.yaml` and push to the integration branch.
+3. Branch off and write the real document with that number.
+
+This applies to PRD/SPEC/TEST-PLAN ids **and** to `BACKLOG-NNN` entries (backlog.md is a shared single file — coordinate additions the same way).
+
+### Cross-branch invisibility — sync before you design
+
+An architect's cross-PRD impact analysis only sees documents **on the current branch**; another person's in-flight PRD on an unmerged branch is invisible. Before pm writes a PRD or architect writes a SPEC, **rebase/merge from the integration branch** so you see what's already merged, and check the `docs/index.yaml` reservations for in-flight numbers. If two active PRDs touch the same module/API/table, serialize them or have the architects add an explicit integration task — don't let them merge blind.
+
+### SPEC-000 is reconciled on the integration branch only
+
+The living architecture doc is a magnet for concurrent appends. Feature branches do **not** edit SPEC-000. After a PRD merges, a designated architect updates SPEC-000 **on the integration branch** to fold in that PRD's API/data-model/module changes. This keeps one authoritative baseline instead of N divergent ones.
+
+### Approval gates map onto PRs (but keep the early gates)
+
+PR review can serve as the **ship** gate (merging = ship approval). But the PRD and SPEC gates happen *before* implementation for a reason (catching a bad design before code is written), so prefer to still get PRD/SPEC sign-off in-session (or via stacked PRs) rather than collapsing all three into one final PR review. Record sign-off with `approved-by` either way.
+
+### Memory is local — durable knowledge goes in committed docs
+
+`memory: project` is per-environment and is **not** shared across teammates; don't rely on it as team truth. Anything the whole team must know (architecture decisions, conventions, fragile modules) belongs in committed documents — ADRs, SPEC-000, this CLAUDE.md — not in agent memory.
 
 ## Context Management
 
@@ -277,8 +350,14 @@ For teams, run one feature branch per person; the branch name is the owner ident
 # Rebuild the document index
 python scripts/build_index.py
 
-# Rebuild the STATUS board (run after every stage change)
+# Rebuild the STATUS board (the PostToolUse hook also does this automatically)
 python scripts/build_status.py
+
+# Check intended state vs. evidence (use as a pre-ship gate / in CI; exit 1 on errors)
+python scripts/check_state.py
+
+# Allocate the next free document id (multi-dev: run on the integration branch)
+python scripts/next_id.py prd
 
 # Run Playwright E2E
 npx playwright test

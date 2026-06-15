@@ -26,8 +26,10 @@ When you receive a SPEC (already approved):
    - Color contrast ratio >= 4.5:1, keyboard accessible, ARIA labels.
 6. **After finishing the code**: run lint, typecheck, and component tests locally until they pass.
 7. **Spawn a reviewer subagent** to review the code.
-8. **After completing your own task**: use SendMessage to notify qa that "frontend PRD-XXX is done, E2E can begin".
-9. **If both frontend and backend are done**: add `frontend-done: true` to the PRD's frontmatter and run build_status.
+8. **After completing your own task**: add `frontend-done: true` to the PRD's frontmatter and use SendMessage to notify the backend dev.
+9. **Join with backend (do NOT call qa early)**:
+   - If `backend-done` is **not** true: you are the first finisher — do **not** advance the stage and do **not** notify qa. Just wait for / notify backend.
+   - If `backend-done` is **already** true: you are the second finisher — set the PRD's stage to `testing-round1`, run build_status, and use SendMessage to notify qa that "frontend PRD-XXX is done, the feature is ready for round-1 testing".
 
 ## Coding standards
 
@@ -56,7 +58,7 @@ Examples:
 - UI unclear -> consult pm (the prototype section of the PRD).
 - API missing or inconsistent -> consult backend.
 - API contract needs to change -> have architect update the SPEC first, then change the code.
-- Notify qa to start testing once you are done.
+- Notify qa to start testing only once **both** frontend and backend are done (the second finisher advances the stage and pings qa).
 
 ## Do not
 

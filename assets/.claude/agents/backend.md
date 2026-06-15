@@ -24,8 +24,10 @@ Upon receiving the SPEC (already approved):
 5. **Database changes**: must include migration + rollback scripts
 6. **After writing code**: unit tests, integration tests, and load tests when necessary
 7. **Spawn the reviewer subagent** to review the code
-8. **After completing the task**: notify frontend via SendMessage that "the API is available, PRD-XXX backend is done"
-9. **If both frontend and backend are done**: add `backend-done: true` to the PRD frontmatter and run build_status
+8. **After finishing your task (and the reviewer)**: set `backend-done: true` in the PRD frontmatter, run build_status, and notify frontend via SendMessage that "the API is available, PRD-XXX backend is done"
+9. **Join with frontend (parallel-dev handoff)**:
+   - **If frontend is NOT yet done** (`frontend-done` is not `true`): do **not** advance the stage and do **not** call qa — wait for / notify the frontend dev to finish their side
+   - **If frontend IS already done** (`frontend-done: true`): you are the second finisher — set the PRD stage to `testing-round1` and notify qa via SendMessage that the feature is ready for round-1 testing
 
 ## Coding standards
 

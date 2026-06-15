@@ -12,7 +12,7 @@
 
 **One assistant can write code. A *team* can ship it — with design, review, tests, and your sign-off at every gate.** ⭐ Star this if it's useful.
 
-`7 agents` · `8 stages` · `3 human approval gates` · `6 doc types` · `0 external dependencies`
+`7 agents` · `8 stages` · `3 human approval gates` · `7 doc types` · `0 external dependencies`
 
 **Who it's for:** solo developers orchestrating AI coding, small teams that want a repeatable AI dev process, and anyone who needs an auditable trail from requirement to design to tests to ship.
 
@@ -53,6 +53,9 @@ This skill fixes all four: a serial flow, mandatory approval gates, a centralize
 
 Then: approve the scaffold, install dependencies, and run your first requirement through the 8 stages.
 
+> **Installing into a project that already has `.claude/settings.json`?** The scaffold is merged key-by-key, not overwritten: set `env.CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`, union the existing `permissions.deny` list, and append the PostToolUse hook.
+> A `.bak` backup of your `settings.json` (and `CLAUDE.md`) is taken first.
+
 ## What you get
 
 | Agent | Responsibility | Key output |
@@ -72,13 +75,13 @@ flowchart TD
     C -->|🛑 approve| D[Frontend // Backend build + self-test]
     D --> E[QA round 1 + Playwright E2E]
     E --> F[QA round 2: regression + fix verification]
-    F -->|🛑 approve| G[Deploy]
+    F -->|🛑 approve| G[Done: merge-ready]
     G --> H[PM rolls up → STATUS.md / status.html]
 ```
 
 ## The dashboard
 
-Every agent only updates a `stage` field in each doc's frontmatter; `scripts/build_status.py` aggregates them by requirement ID and regenerates `STATUS.md` and `status.html`. A PostToolUse hook reruns it automatically on every doc edit, so the board is never stale.
+Every agent only updates a `stage` field in each doc's frontmatter; `scripts/build_status.py` aggregates them by requirement ID and regenerates `STATUS.md` and `status.html`. A PostToolUse hook runs a cross-platform Python entry (`scripts/refresh_status.py`) on every `docs/*.md` edit — working identically on Windows, macOS, and Linux — so the board is never stale.
 
 ![Status dashboard](demo/dashboard.png)
 
@@ -94,8 +97,8 @@ Each requirement shows a live progress bar across all milestones — done, curre
 2. You approve. **Architect** writes `SPEC-008` — API, data model, task breakdown → 🛑 **waits for your approval**.
 3. You approve. **Frontend** and **Backend** build in parallel, each spawning **reviewer** when done.
 4. **QA** writes `TEST-PLAN-008` + Playwright E2E and runs round 1; failures bounce back to dev as `fixing`.
-5. **QA** reruns regression (round 2) → 🛑 **waits for your deploy approval**.
-6. You approve → `deployed`. Every stage change refreshes the dashboard automatically.
+5. **QA** reruns regression (round 2) → 🛑 **waits for your ship approval**.
+6. You approve → **Done (approved & merge-ready)**. Every stage change refreshes the dashboard automatically.
 
 At each 🛑 the team stops and waits — you stay in control, and the board always shows who's doing what.
 
@@ -113,7 +116,7 @@ The same ID threads through all three, and the test plan even records a real rou
 |---|:---:|:---:|:---:|
 | Specialized roles | ❌ | ⚠️ improvised | ✅ 7 defined agents |
 | Serial orchestration & handoffs | ❌ | ❌ | ✅ 8-stage flow |
-| Human approval gates | ❌ | ❌ | ✅ PRD · SPEC · deploy |
+| Human approval gates | ❌ | ❌ | ✅ PRD · SPEC · ship |
 | Centralized progress board | ❌ | ❌ | ✅ auto-generated |
 | ID-paired docs (PRD→SPEC→tests) | ❌ | ❌ | ✅ |
 | Right-sized flow (S/M/L tiers) | ❌ | ❌ | ✅ small changes skip the ceremony |
@@ -139,7 +142,9 @@ You don't have to install anything to read the design:
 
 ## Requirements
 
-Claude Code (agent teams), Python 3 (dashboard scripts), a POSIX shell for the hook (macOS/Linux/git-bash/WSL), and optionally Node + Playwright for the E2E layer.
+Claude Code (agent teams) and Python 3 (for the dashboard scripts and the PostToolUse hook — the hook is pure Python and runs on Windows, macOS, and Linux alike, with no POSIX shell, Git Bash, or WSL needed). Optionally Node + Playwright for the E2E layer.
+
+The team delivers approved, tested, merge-ready code. Running CI/CD and the actual production deploy stay your responsibility — migration/rollback scripts and the RUNBOOK are produced for you, but no stage executes them.
 
 ## Upgrading
 
@@ -150,7 +155,27 @@ Claude Code (agent teams), Python 3 (dashboard scripts), a POSIX shell for the h
 cd ~/.claude/skills/claude-agent-team && git pull   # adjust path if project-local
 ```
 
-The skill trigger and scaffolding logic update immediately. **Already-scaffolded projects** won't auto-update — agent definitions and templates were copied into your project at install time. To pick up changes from a new version, diff `assets/` against your `.claude/` directory and merge selectively. See [CHANGELOG](CHANGELOG.md) for what changed between versions.
+The skill trigger and scaffolding logic update immediately. **Already-scaffolded projects** won't auto-update — agent definitions and templates were copied into your project at install time. The installed version is stamped into your project as an HTML comment marker (`<!-- claude-agent-team: vX.Y.Z -->`) at the top of the project's `CLAUDE.md`, so you can always tell what you're running. To pick up changes from a new version, do a selective diff/merge of `assets/` against your `.claude/` directory — your own `docs/` are never touched. See [CHANGELOG](CHANGELOG.md) for what changed between versions.
+
+## Uninstall
+
+The scaffold owns a known set of paths: `.claude/agents/*`, `.claude/skills/doc-conventions`, `.claude/skills/playwright-testing`, `scripts/*.py`, `docs/_templates/`, `playwright.config.ts`, plus the agent-team block it appends to `.claude/settings.json` and `CLAUDE.md`. To remove it cleanly: restore `.claude/settings.json` and `CLAUDE.md` from the `.bak` backups taken at install, then delete the skill-owned paths above. Your own `docs/` requirements are yours to keep. Tip: install on a clean git tree or a dedicated branch so a `git checkout` is a reliable one-command rollback.
+
+## Working as a team
+
+Sharing the scaffold across a team has its own protocol — commit `.claude/` as shared truth (don't have everyone install separately), claim doc IDs with `scripts/next_id.py` on the integration branch before branching, and so on. See the **"Multi-Developer Mode"** section in your project's `CLAUDE.md` for the full workflow.
+
+Add this to the **target project's** `.gitignore`:
+
+```gitignore
+# claude-agent-team generated artifacts
+status.html
+docs/index.yaml
+playwright-report.json
+__pycache__/
+```
+
+Only the integration branch commits `STATUS.md`.
 
 ## Contributing
 

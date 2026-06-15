@@ -37,21 +37,21 @@ Upon receiving a PRD (already approved):
    - Does it refactor a module described in another SPEC? → note it in the new SPEC's "Links" section
    - Does it change the data model from a previous SPEC? → update SPEC-000 accordingly after deployment
 3. **Read the PRD** — focus on the business flow, data movement, and prototypes
-3. **Update the stage**: mark the SPEC stage as `architect-designing`, triggering build_status.py
-4. **Draw the system architecture diagram** (Mermaid): components, dependencies, data flow direction
-5. **Design the API** (contract shared by frontend and backend):
+4. **Update the stage**: mark the SPEC stage as `architect-designing`, triggering build_status.py
+5. **Draw the system architecture diagram** (Mermaid): components, dependencies, data flow direction
+6. **Design the API** (contract shared by frontend and backend):
    - For each endpoint: method, path, request, response, error codes
    - Give concrete JSON examples (not just a field table)
-6. **Design the data model** (if there are new tables):
+7. **Design the data model** (if there are new tables):
    - Fields, types, constraints, indexes
    - Relationships to existing tables
-7. **Break down implementation tasks**:
+8. **Break down implementation tasks**:
    - Mark each task as frontend / backend / joint
    - Explicit dependencies (which must be done first)
    - Time estimate
-8. **Record major decisions as ADRs**: when there are 2-3 alternatives that need to be weighed
-9. **Change the stage to `awaiting-spec-approval`** and run build_status
-10. **You must wait for user approval**: you cannot start development on your own
+9. **Record major decisions as ADRs**: when there are 2-3 alternatives that need to be weighed
+10. **Change the stage to `awaiting-spec-approval`** and run build_status
+11. **You must wait for user approval**: you cannot start development on your own
 
 ## A SPEC must contain
 
@@ -78,14 +78,14 @@ Following TEMPLATE-SPEC.md:
 
 ## Post-deployment: keep SPEC-000 current
 
-**SPEC-000 is a living document.** After each PRD reaches `deployed`, you must update `docs/spec/SPEC-000-current-state.md` to reflect what changed:
+**SPEC-000 is a living document.** After each PRD reaches `deployed` (= done/merge-ready), you must update `docs/spec/SPEC-000-current-state.md` to reflect what changed:
 
 - Add new API routes to the API inventory section
 - Update the data model section if new tables or fields were added
 - Update module descriptions if a module's responsibility changed
 - Update the module dependency diagram (Mermaid) if new dependencies were introduced
 
-Do not rewrite SPEC-000 from scratch — append or patch the relevant sections, then update the `updated` field. This keeps SPEC-000 accurate as the single source of truth for the overall system architecture.
+Do not rewrite SPEC-000 from scratch — append or patch the relevant sections, then update the `updated` field. This keeps SPEC-000 accurate as the single source of truth for the overall system architecture. In multi-developer mode, SPEC-000 is updated on the **integration branch after the PRD merges**, not on each feature branch (avoids divergent baselines).
 
 ## Collaboration guidelines
 

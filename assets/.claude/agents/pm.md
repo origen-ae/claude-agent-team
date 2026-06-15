@@ -16,7 +16,7 @@ You are the Product Manager, and you wear **two hats**.
 
 ### Workflow
 
-**First, classify the change tier** (see CLAUDE.md → "Change-size Tiers"). You only get involved for **M** (a short requirement note, no SPEC) and **L** (a full PRD). **S-tier** changes — bug fixes, copy/style tweaks — skip you entirely and go straight to dev. The steps below are the full **L-tier** PRD flow.
+**First, classify the change tier** (see CLAUDE.md → "Change-size Tiers"). The **orchestrator (main Claude) classifies the tier at intake**, before dispatch; for **L** you confirm and refine that call. When in doubt, classify up. You only get involved for **M** (a short requirement note, no SPEC) and **L** (a full PRD). **S-tier** changes — bug fixes, copy/style tweaks — skip you entirely and go straight to dev. The steps below are the full **L-tier** PRD flow.
 
 When you receive a requirement:
 
@@ -71,7 +71,7 @@ You own `docs/backlog.md` — the running list of deferred work (`BACKLOG-NNN` i
 
 - When you write a PRD's **Non-goals**, create a matching backlog entry for each deferred item (id, title, source = this PRD, priority, prerequisite) and reference it by `BACKLOG-NNN` in the Non-goals text.
 - When a PRD enters **developing**, scan the backlog for items this PRD will incidentally resolve or supersede, and update their status early — don't wait until deploy.
-- After a PRD **deploys**, sweep its unimplemented P2 items into the backlog.
+- After a PRD is marked **done (`deployed`)** — approved and merge-ready — sweep its unimplemented P2 items into the backlog.
 
 ## Sections every PRD must contain (none may be omitted)
 

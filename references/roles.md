@@ -3,10 +3,10 @@
 This team runs a serial delivery flow with a small, fixed set of agents and documents:
 
 - **7 agents**: pm / architect / frontend / backend / qa + reviewer / librarian
-- **6 document types**: PRD / SPEC / ADR / TEST-PLAN / RUNBOOK + STATUS
+- **7 document types**: PRD / SPEC / ADR / TEST-PLAN / RUNBOOK / BACKLOG + STATUS
 - **3 scripts**: build_index.py, build_status.py, parse_playwright_report.py
 - **Playwright E2E**: UI test automation
-- **0 external dependencies**: no database, no Feishu, no vector store
+- **0 external dependencies**: no database, no Lark, no vector store
 
 The flow has 8 stages and 3 approval gates. Each document carries a numeric ID, and SPEC / TEST-PLAN share the same number as their parent PRD (the ID-pairing rule). The sections below summarize each agent: its responsibility, key outputs, and position in the flow. They do not duplicate the full agent prompts — see the linked definition for the authoritative version.
 

@@ -19,12 +19,12 @@ QA round 1 (including Playwright E2E)
    ↓
 QA re-test (automated regression + fix verification)
    ↓ 🛑 User approval
-Deploy
+Done — approved & ready to merge/ship
    ↓
 PM rolls up progress → STATUS.md / status.html
 ```
 
-Three human approval gates: PRD approval, technical-solution approval, and pre-deploy approval.
+Three human approval gates: PRD approval, technical-solution approval, and ship approval (code ready to merge/ship).
 
 ### Core Configuration
 
@@ -73,17 +73,19 @@ When the user starts a new feature, the orchestrator dispatches the **pm** agent
 6. fixing           - dev fixes issues found in round 1 (if any)
    ↓
 7. testing-round2   - qa runs automated regression + fix verification
-   ↓ 🛑 User approves deployment
-8. deployed         - mark as complete
+   ↓ 🛑 User approves shipping (code ready to merge/ship)
+8. deployed         - Done — approved & ready to merge/ship
 ```
 
 ### Mandatory Human Approval Gates
 
 - **🛑 Stage 2 → 3**: user approves the PRD (are the features, prototype, and flow all acceptable?)
 - **🛑 Stage 3 → 4**: user approves the SPEC (is the technical solution OK?)
-- **🛑 Stage 7 → 8**: user approves deployment (is it ready to go live?)
+- **🛑 Stage 7 → 8**: user approves shipping (code ready to merge/ship)
 
 At these gates, the agent stops and waits; it never advances on its own.
+
+**Scope**: the team delivers approved, tested, merge-ready code. Running CI/CD and the actual production deploy stay the user's responsibility — migration/rollback scripts and the RUNBOOK are produced but not executed by any stage.
 
 ### Approval Gates Are Loops, Not One-Way Doors
 
@@ -104,6 +106,8 @@ Communicate directly via SendMessage, without routing through the lead:
 - qa finds a requirement is untestable → contact pm
 - qa finds an implementation bug → SendMessage the responsible dev
 
+**Fallback**: if the experimental agent-teams feature (and SendMessage) is unavailable, the orchestrator (main Claude) acts as router — it invokes each role itself and dispatches the next stage manually. The frontmatter `stage` field remains the source of truth.
+
 ### Mandatory Actions After Completing a Stage
 
 After completing its own stage, every agent **must**:
@@ -117,7 +121,7 @@ After completing its own stage, every agent **must**:
 The full set of `stage` values in document frontmatter:
 
 ```
-stage: pending | pm-designing | awaiting-prd-approval | architect-designing | awaiting-spec-approval | developing | testing-round1 | fixing | testing-round2 | awaiting-deploy-approval | deployed | cancelled
+stage: pending | pm-designing | awaiting-prd-approval | architect-designing | awaiting-spec-approval | developing | testing-round1 | fixing | testing-round2 | awaiting-deploy-approval | deployed | superseded | cancelled
 ```
 
 | stage | Meaning | Who may set this state |
@@ -131,21 +135,20 @@ stage: pending | pm-designing | awaiting-prd-approval | architect-designing | aw
 | `testing-round1` | Round 1 testing in progress | qa |
 | `fixing` | Fixes in progress | qa (when failures are found) |
 | `testing-round2` | Re-test in progress | qa |
-| `awaiting-deploy-approval` | Awaiting user approval of deployment | qa (when the re-test passes) |
-| `deployed` | Deployed | pm (marked after deployment) |
+| `awaiting-deploy-approval` | Awaiting ship approval | qa (when the re-test passes) |
+| `deployed` | Done — approved & ready to merge/ship | pm (marked after ship approval) |
+| `superseded` | 🔁 Replaced by a later PRD | architect (when a new PRD refactors it) |
 | `cancelled` | Cancelled | pm (when the user decides not to proceed) |
 
 **Key rule**: once a document is marked `awaiting-*-approval`, it must wait for user approval; the agent cannot advance on its own.
 
 ## Multi-Developer Mode (optional)
 
-For teams, run one feature branch per person; the branch name is the owner identity.
+For teams, run one feature branch per person; the branch name is the owner identity. The full protocol lives in **assets/CLAUDE.md "Multi-Developer Mode"** — see there for details. Key points:
 
-- Develop on `feature/<name>`; open a PR into the integration branch (e.g. `develop`).
-- **PR review doubles as the approval gates**: the PRD in the PR description is approved on the PR, likewise the SPEC, and merging is the deploy approval.
-- PRD frontmatter records `owner: feature/<name>`.
-- Rebuild `STATUS.md` only on the shared branch; feature branches don't commit it.
-- For a large feature, claim the PRD number on the shared branch first (a reserved entry in `docs/index.yaml`), then write the PRD on your feature branch.
+- Before branching, claim document ids on the **integration branch** with `python scripts/next_id.py <type>` (it scans files plus index reservations), then write the doc on your `feature/<name>` branch.
+- Generated files are gitignored: `status.html` and `docs/index.yaml` are not committed; `STATUS.md` is committed **only on the integration branch** (feature branches don't commit it).
+- SPEC-000 is reconciled on the integration branch after merge.
 
 ## What the Scaffold Sets Up / First Run
 

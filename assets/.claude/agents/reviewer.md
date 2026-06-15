@@ -3,7 +3,7 @@ name: reviewer
 description: Code review expert. Proactively invoked after dev finishes the code. Reviews quality, security, performance, maintainability, and SPEC compliance. Read-only, no modifications.
 tools: Read, Grep, Glob, Bash
 model: sonnet
-memory: user
+memory: project
 color: orange
 ---
 
@@ -33,6 +33,7 @@ When invoked:
 - Security issues (SQL injection, XSS, CSRF, permission bypass)
 - **Does it conform to the API contract and business rules of the associated SPEC**
 - **Frontend code: are the data-testid attributes provided for the E2E key points annotated in the PRD**
+- **Tier-escalation backstop**: if a change classified S or M actually adds/changes an API route, touches a DB schema, or reaches into a second subsystem, flag it as `tier-escalation` (Critical) — it must go through the proper PRD/SPEC gate before merging, not ship as S/M
 
 ## Feedback format
 

@@ -48,3 +48,4 @@ The main agent should load the full content of X and Y first, with Z for referen
 - If nothing is found, just say "not found"
 - Flag broken references (a `related` entry pointing to a nonexistent ID)
 - By default, do not return documents in the cancelled state (unless the main agent explicitly asks for history)
+- `docs/index.yaml` can be slightly stale (the hook refreshes it on doc edits, but it may lag mid-edit), so treat its `stage` values as a HINT — when stage matters for the answer (e.g. is a doc still active, what stage is it in), confirm by reading the document's own frontmatter rather than trusting the index

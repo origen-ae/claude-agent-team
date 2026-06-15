@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project uses [Semantic Versioning](https://semver.org/).
 
+## [1.3.0] - 2026-06-15
+
+A design-audit pass: fixes correctness/honesty bugs found in a holistic review, clarifies the delivery boundary, and hardens multi-developer use.
+
+### Fixed
+- **Cross-platform hook**: the PostToolUse hook is now a pure-Python entry point (`scripts/refresh_status.py`) that works on Windows PowerShell/CMD, macOS, and Linux. The old POSIX one-liner (`... 2>/dev/null || true`) silently did nothing on Windows, so the dashboard never refreshed there.
+- **Hook path filtering**: removed the non-existent `pathMatcher` hook field (it was silently ignored, firing the rebuild on *every* Edit/Write); the entry point now filters to `docs/**/*.md` itself and also rebuilds the librarian index.
+- **Honest progress board**: progress checkmarks are now artifact-driven — a milestone only shows ✅ if the artifact proving it (SPEC, TEST-PLAN) exists; a stage that jumped ahead without its artifact renders ⚠️ instead of a falsely green check.
+- **Consistency**: document-type count corrected to **7** (README, roles); "no Lark" naming unified; `superseded` stage and `supersedes`/`superseded-by`/`approved-by` fields propagated to all references; `references/document-system.md` no longer embeds a stale full copy of the doc-conventions skill (now points to the source); duplicate step number in `architect.md` fixed; versions aligned to 1.3.0 (SKILL, FAQ, plugin.json).
+
+### Added
+- **State reconciliation** (`scripts/check_state.py`): asserts cross-document invariants (no stage past architecture without a SPEC, no done-without-TEST-PLAN, stalled-item detection) and exits non-zero — usable as a pre-ship gate / in CI. The board surfaces the same warnings in a "⚠️ State warnings" block.
+- **ID allocator** (`scripts/next_id.py`): allocates the next free document id from files + index reservations, for collision-free numbering in multi-developer mode.
+- **DoR / DoD gate checklists** and an `approved-by` field so gate sign-off is deliberate and auditable; the board now shows each pending item's `summary`.
+- **Tier classification ownership + escalation**: the orchestrator classifies S/M/L at intake; mid-flight schema/API/second-subsystem discoveries force an upgrade; the reviewer is the tier-escalation backstop.
+- **Parallel-dev join**: explicit `developing → testing-round1` handoff — the second finisher advances the stage; qa waits for both `frontend-done` and `backend-done`.
+- **agent-teams fallback**: documented orchestrator-as-router behaviour when the experimental agent-teams feature / SendMessage is unavailable.
+- **Uninstall** instructions and an installed-version stamp in the project's CLAUDE.md.
+
+### Changed
+- **Delivery boundary clarified**: the terminal state (still keyed `deployed`) now reads as **"Done — approved & merge-ready"**; running CI/CD and the production deploy are explicitly the user's responsibility. Wording updated across CLAUDE.md, README, SKILL, workflow, roles, FAQ.
+- **Multi-Developer Mode rewritten**: commit `.claude/` as shared truth (no per-person installs); gitignore `status.html` / `docs/index.yaml` and commit `STATUS.md` only on the integration branch; reserve ids on the integration branch before branching; sync before designing (in-flight branches are invisible to cross-PRD analysis); SPEC-000 reconciled on the integration branch after merge; project memory is local, so shared knowledge goes in committed docs.
+- **Install is a structured merge**: `.claude/settings.json` and `CLAUDE.md` are merged key-by-key with a `.bak` backup instead of being overwritten or skipped wholesale.
+- CI (`validate.yml`) now actually runs the scripts against the worked example and asserts a non-empty STATUS.
+- `build_status.py`: HTML output escapes interpolated titles/summaries; removed an unused import.
+
 ## [1.2.0] - 2026-06-15
 
 ### Added

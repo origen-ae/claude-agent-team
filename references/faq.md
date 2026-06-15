@@ -4,7 +4,7 @@
 Just double-click the file to open it in a browser locally, or run `open status.html` (Mac) / `start status.html` (Windows) / `xdg-open status.html` (Linux).
 
 **Q2: What if I forget to run build_status.py?**
-The hook configured in `.claude/settings.json` runs automatically after every document change. If you notice that STATUS is not updated, the hook may have failed; run `python scripts/build_status.py` manually.
+The PostToolUse hook configured in `.claude/settings.json` runs `scripts/refresh_status.py` automatically after every `docs/*.md` edit (which in turn reruns build_index + build_status). If you notice that STATUS is not updated, the hook may have failed; run `python scripts/build_status.py` manually.
 
 **Q3: How are test results aggregated automatically?**
 Run `npx playwright test --reporter=json > playwright-report.json`, then run `python scripts/parse_playwright_report.py playwright-report.json`. This writes the test results into the frontmatter of the corresponding TEST-PLAN. Then build_status reads and displays them.
@@ -23,8 +23,10 @@ Skip PRD/SPEC and let backend/frontend fix it directly, but afterward you must:
 - Run qa to re-test and verify the fix
 - If there are important findings, add a RUNBOOK or ADR
 
+Note: even on the hotfix path the team stops at merge-ready code — you run the actual deploy.
+
 **Q7: The project already has code. How do I start?**
-On the first run, execute step 5 of the scaffolding procedure (Bootstrap project baseline) to have the `architect` agent browse `src/` and generate `docs/spec/SPEC-000-current-state.md`. You are not required to backfill PRDs for existing features; start strictly following the process from new features onward.
+On the first run, execute the project-baseline bootstrap step (have the `architect` browse `src/` and generate `docs/spec/SPEC-000-current-state.md`). You are not required to backfill PRDs for existing features; start strictly following the process from new features onward.
 
 **Q8: Can STATUS.md be shown to non-technical people?**
 Yes. Markdown renders tables automatically on GitHub/GitLab, so the key information (number of items awaiting approval, number in progress) is clear at a glance. For showing it to the boss, we recommend status.html (it looks nicer).
@@ -38,15 +40,28 @@ The PM changes the corresponding PRD's stage to `cancelled` and adds `cancelled-
 3. If problems recur, check whether the agent memory has accumulated faulty patterns
 
 **Q11: The STATUS dashboard isn't auto-updating on Windows.**
-The PostToolUse hook uses POSIX shell syntax (`2>/dev/null || true`). It requires **Git Bash or WSL** — it will not work in PowerShell or CMD. To verify: open a Git Bash terminal and run `python scripts/build_status.py` manually. If that works, Git Bash is correctly installed. If Claude Code's hook still doesn't fire, confirm that Git Bash is in your system PATH so Claude Code can find the shell. Alternatively, run `python scripts/build_status.py` manually after each stage change.
+This is fixed. The PostToolUse hook is now a cross-platform Python entry point (`scripts/refresh_status.py`) that works in PowerShell/CMD without Git Bash or WSL. If STATUS still doesn't refresh, run `python scripts/build_status.py` manually and confirm Python is on your PATH.
+
+**Q12: Several people work the same project, each with their own agent team — what do we watch out for?**
+See CLAUDE.md "Multi-Developer Mode" for the full protocol. Key points:
+- Commit `.claude/` as the shared source of truth — don't have each person install the team separately.
+- Gitignore `status.html` and `docs/index.yaml`; commit `STATUS.md` only on the integration branch.
+- Claim ids with `python scripts/next_id.py prd` on the integration branch before branching (avoids PRD-number collisions).
+- Sync from the integration branch before designing so the architect can see others' merged work — in-flight branches are invisible.
+- SPEC-000 is reconciled on the integration branch after merge.
+- Project memory is local, so shared knowledge goes in committed docs.
+
+**Q13: What if my Claude Code doesn't support agent teams / SendMessage?**
+It's experimental. If it's unavailable, the orchestrator (main Claude) acts as router: it invokes each role itself and dispatches the next stage manually. The frontmatter `stage` stays the source of truth, so the document flow is unchanged.
 
 ---
 
 ## Version & evolution
 
-- **Guide version**: v1.1.0 — see [CHANGELOG](../CHANGELOG.md) for what changed
+- **Guide version**: 1.3.0 — see [CHANGELOG](../CHANGELOG.md) for what changed
 - **Target team size**: 5-10 people
 - **Estimated rollout time**: 1-2 days (including the first end-to-end run of the process)
+- **Scope boundary**: the team stops at approved, tested, merge-ready code — running CI/CD and the actual production deploy stay your responsibility.
 
 Future directions (enable as needed):
 
