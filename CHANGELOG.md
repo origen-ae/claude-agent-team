@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project uses [Semantic Versioning](https://semver.org/).
 
+## [1.7.0] - 2026-06-15
+
+### Added
+- **Security as a first-class concern** (P1-14), at the layers the team controls — security was previously just one bullet in the reviewer checklist:
+  - **Design-time threat modeling**: the SPEC template gains a "Security & abuse cases" section (STRIDE-lite — each threat → mitigation → verifying test), REQUIRED when a feature touches auth/authorization, money/balances, PII, file uploads, or untrusted input; otherwise state "Not security-sensitive: <why>". Wired into `architect.md` ("A SPEC must contain").
+  - **Reviewer security deep-dive**: a mandatory expanded checklist for sensitive diffs — authorization on every mutation / no IDOR, injection, secrets & PII, money/state integrity (idempotency, no double-spend), and new-dependency supply-chain flags; cross-checked against the SPEC's abuse cases.
+  - **DoD gate item** for security (abuse cases addressed + negative tests + new deps noted).
+  - **Dependency/supply-chain scanning is the user's CI** (consistent with the delivery boundary): README "Security" section recommends `npm audit` / `pip-audit`, Dependabot/Renovate, and optional CodeQL/semgrep. No dedicated security agent (too heavy for a small team).
+  - New FAQ Q14 on security scope.
+
 ## [1.6.0] - 2026-06-15
 
 ### Changed

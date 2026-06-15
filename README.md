@@ -177,6 +177,24 @@ __pycache__/
 
 Only the integration branch commits `STATUS.md`.
 
+## Security
+
+Security is handled at the layers the team actually controls:
+
+- **Design time** — for any feature touching auth, money/balances, PII, file uploads, or untrusted input, the architect's SPEC includes a **"Security & abuse cases"** section (a lightweight STRIDE pass: each threat → mitigation → the test that verifies it). That drives qa's negative tests and the reviewer's scrutiny.
+- **Review time** — the reviewer runs a **security deep-dive** on sensitive diffs (authorization on every mutation / no IDOR, injection, secrets & PII, money/state integrity, new dependencies).
+
+**What stays yours (CI):** consistent with the delivery boundary, dependency/supply-chain scanning and SAST run in *your* CI, not the agent team. Recommended:
+
+```yaml
+# in your own CI, on PRs
+- run: npm audit --audit-level=high      # or: pip-audit
+# optional static analysis:
+# - uses: github/codeql-action/analyze   # or semgrep
+```
+
+Also enable **Dependabot** or **Renovate** so new/transitive dependencies get CVE alerts. A dedicated security agent is intentionally not included — it's heavy for a small team; the design-time + review-time coverage above is the high-value, in-scope part.
+
 ## Contributing
 
 Issues and PRs welcome — see [CONTRIBUTING.md](CONTRIBUTING.md). **If this saves you time, please ⭐ star the repo — it genuinely helps others find it.**

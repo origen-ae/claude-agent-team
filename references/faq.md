@@ -54,11 +54,14 @@ See CLAUDE.md "Multi-Developer Mode" for the full protocol. Key points:
 **Q13: What if my Claude Code doesn't support agent teams / SendMessage?**
 It's experimental. If it's unavailable, the orchestrator (main Claude) acts as router: it invokes each role itself and dispatches the next stage manually. The frontmatter `stage` stays the source of truth, so the document flow is unchanged.
 
+**Q14: How does the team handle security?**
+At the layers it controls: for features touching auth, money/balances, PII, file uploads, or untrusted input, the architect's SPEC includes a "Security & abuse cases" section (STRIDE-lite: threat → mitigation → verifying test), and the reviewer runs a security deep-dive on those diffs (authorization/IDOR, injection, secrets & PII, money/state integrity, new dependencies). Dependency/supply-chain scanning and SAST run in **your** CI (consistent with the delivery boundary) — see README → Security for the recommended `npm audit` / `pip-audit` / Dependabot setup. A dedicated security agent isn't bundled (too heavy for a small team).
+
 ---
 
 ## Version & evolution
 
-- **Guide version**: 1.6.0 — see [CHANGELOG](../CHANGELOG.md) for what changed
+- **Guide version**: 1.7.0 — see [CHANGELOG](../CHANGELOG.md) for what changed
 - **Target team size**: 5-10 people
 - **Estimated rollout time**: 1-2 days (including the first end-to-end run of the process)
 - **Scope boundary**: the team stops at approved, tested, merge-ready code — running CI/CD and the actual production deploy stay your responsibility.

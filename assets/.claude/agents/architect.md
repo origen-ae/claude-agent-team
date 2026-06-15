@@ -69,6 +69,7 @@ Following TEMPLATE-SPEC.md:
 9. **Implementation task breakdown** (table, including the responsible agent and dependencies)
 10. **Performance/availability targets**
 11. **Risks and mitigations**
+12. **Security & abuse cases** — REQUIRED when the feature touches auth/authorization, money or balances, PII/sensitive data, file uploads, or untrusted external input. Do a lightweight STRIDE-style pass: for each realistic threat, name the mitigation and which test verifies it (this directs qa's negative tests and the reviewer's scrutiny). For a non-sensitive feature, state "Not security-sensitive: <why>" — don't omit the section.
 
 ## An ADR must contain
 

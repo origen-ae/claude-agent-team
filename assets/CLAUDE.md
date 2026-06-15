@@ -1,6 +1,6 @@
 # Project Collaboration Conventions
 
-<!-- claude-agent-team: v1.6.0 — do not remove; upgrades use this to detect the installed version -->
+<!-- claude-agent-team: v1.7.0 — do not remove; upgrades use this to detect the installed version -->
 
 ## Project Status (filled in by the architect after first launch)
 
@@ -107,6 +107,7 @@ The agent presenting a gate states which items are met; the user uses them to ap
 - [ ] TEST-PLAN round-2 results are filled in and green
 - [ ] Reviewer raised no unresolved Critical findings
 - [ ] Backend: migration + rollback scripts present (if schema changed)
+- [ ] Security: for auth/money/PII features, the SPEC's "Security & abuse cases" are addressed and have negative tests; any new dependency is noted for supply-chain scanning
 - [ ] SPEC-000 update is queued (architect applies it once shipped)
 
 ### Approval Gates Are Loops, Not One-Way Doors

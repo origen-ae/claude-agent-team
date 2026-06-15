@@ -167,3 +167,26 @@ Parallelization opportunities: backend does T1-T4, frontend does T5-T6 (in paral
 | Points calculation precision issues | Medium | Finances don't reconcile | Store cents as integers, unit tests cover boundaries |
 | Duplicate deduction under high concurrency | Medium | User over-charged | Database row lock + idempotency key |
 | Points rollback on refund | Low | User under-credited | Refund API auto-triggers rollback |
+
+## 11. Security & Abuse Cases
+
+<!--
+REQUIRED when the feature touches any of: authentication/authorization, money or
+balances, personal/sensitive data (PII), file uploads, or untrusted external input.
+For a purely internal/cosmetic feature, write "Not security-sensitive: <one-line why>".
+
+A lightweight STRIDE-style pass — for each realistic threat give the mitigation and
+which test verifies it. This is what tells qa to write the negative/abuse tests and
+tells the reviewer what to scrutinize.
+-->
+
+| # | Threat / abuse case | Category | Mitigation | Verified by |
+|---|---|---|---|---|
+| S1 | A user deducts points from **another** user's account | Authorization | `user_id` taken from the session, never the request body; ownership check on the order | API test: forge another user's order_id → 403 |
+| S2 | Replaying the submit request double-deducts | Tampering / idempotency | Idempotency key on submit; freeze→consume is single-use | Concurrency test: 2x submit → 1 deduction |
+| S3 | Negative or huge `points` value underflows the balance | Tampering | Server-side validation: `0 < points ≤ balance` and `≤ cap` | Boundary tests: negative, 0, > balance, > cap |
+| S4 | Points ledger exposes another user's history | Info disclosure | Queries scoped by session `user_id`; no raw `order_id` lookup without ownership | API test: cross-user read → 403/empty |
+
+- **AuthZ rule**: every state-changing endpoint checks the caller may act on the target resource (don't trust IDs from the client).
+- **Secrets / PII**: no secrets in code or logs; PII fields are not logged.
+- **Dependencies**: note any new third-party dependency here so it gets a supply-chain review (see README → Security).
