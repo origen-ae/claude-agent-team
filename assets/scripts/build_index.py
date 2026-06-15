@@ -26,7 +26,7 @@ def scan():
     seen_ids = {}
 
     for md_file in DOCS_ROOT.rglob("*.md"):
-        if md_file.name in ("README.md", "index.yaml"):
+        if md_file.name in ("README.md", "index.yaml", "backlog.md"):
             continue
         if "_templates" in md_file.parts:
             continue

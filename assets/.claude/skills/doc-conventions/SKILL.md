@@ -5,7 +5,7 @@ description: Project documentation conventions. Used by every agent when creatin
 
 # Project Documentation Conventions
 
-## The 6 Document Types
+## The 7 Document Types
 
 | Type | Prefix | Directory |
 |---|---|---|
@@ -14,6 +14,7 @@ description: Project documentation conventions. Used by every agent when creatin
 | Test plan | TEST-PLAN | docs/test-plan/ |
 | Architecture decision | ADR | docs/adr/ |
 | Incident runbook | RUNBOOK | docs/runbook/ |
+| Backlog | BACKLOG | docs/backlog.md (single running file, pm-owned, not stage-tracked) |
 | Progress board | STATUS | root-level STATUS.md (script-generated) |
 
 ## ID-Pairing Rule
