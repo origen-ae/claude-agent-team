@@ -1,6 +1,6 @@
 # Project Collaboration Conventions
 
-<!-- claude-agent-team: v1.7.0 — do not remove; upgrades use this to detect the installed version -->
+<!-- claude-agent-team: v1.8.0 — do not remove; upgrades use this to detect the installed version -->
 
 ## Project Status (filled in by the architect after first launch)
 
@@ -102,6 +102,7 @@ The agent presenting a gate states which items are met; the user uses them to ap
 - [ ] Prototype flags the E2E key points
 
 **DoD — before the ship gate (`awaiting-deploy-approval`):**
+- [ ] API contract-conformance tests pass (request/response shape, status, error codes match the SPEC), and performance is within the SPEC §9 budget (or the exception is documented)
 - [ ] Every PRD acceptance criterion maps to a passing test
 - [ ] `python scripts/check_state.py` reports no errors
 - [ ] TEST-PLAN round-2 results are filled in and green

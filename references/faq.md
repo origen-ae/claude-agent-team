@@ -61,7 +61,7 @@ At the layers it controls: for features touching auth, money/balances, PII, file
 
 ## Version & evolution
 
-- **Guide version**: 1.7.0 — see [CHANGELOG](../CHANGELOG.md) for what changed
+- **Guide version**: 1.8.0 — see [CHANGELOG](../CHANGELOG.md) for what changed
 - **Target team size**: 5-10 people
 - **Estimated rollout time**: 1-2 days (including the first end-to-end run of the process)
 - **Scope boundary**: the team stops at approved, tested, merge-ready code — running CI/CD and the actual production deploy stay your responsibility.

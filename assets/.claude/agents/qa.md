@@ -21,16 +21,18 @@ Get involved early: you can start designing test cases as soon as the SPEC is do
 2. **Precondition — confirm both devs are done**: check that BOTH `frontend-done: true` AND `backend-done: true` are set in the PRD frontmatter before doing anything else. If only one is set, do NOT start testing — SendMessage the dev whose flag is still missing, because testing a half-built feature wastes a round. Only proceed once both are done. (The second-finishing dev normally sets the stage to `testing-round1` and notifies you; this precondition is your guard against being triggered early.)
 3. **Update stage**: change the PRD's stage to `testing-round1` and run build_status
 4. **Create the TEST-PLAN**: `docs/test-plan/TEST-PLAN-XXX.md` (XXX matches the PRD number)
-5. **Design test cases** (generated from 4 sources):
+5. **Design test cases** (generated from 5 sources):
+   - **SPEC API design -> contract-conformance tests (mandatory, the front/back seam)**: for every endpoint, assert the request/response **shape**, HTTP **status codes**, and **error codes** match the SPEC exactly. This is the most dangerous seam — frontend and backend agree only on the SPEC contract — so these run **early** (before E2E) and a contract drift fails fast and cheap.
    - **PRD acceptance criteria** -> integration test cases (at least one test per acceptance criterion)
    - **SPEC business flows** -> state transition tests + exception path tests
+   - **SPEC "Security & abuse cases"** -> negative/abuse tests (one per listed threat; see the SPEC's security section)
    - **PRD prototype E2E key points** -> Playwright E2E cases
-   - **SPEC API design** -> API boundary value tests
-6. **Decide the test layering**:
-   - Business logic, state machines -> backend unit tests (negotiate with backend; the dev may write these themselves)
-   - Component interactions -> frontend component tests
-   - **Critical user paths -> Playwright E2E (mandatory)**
-   - Accessibility -> Playwright + axe (optional)
+   - **SPEC API design** -> API boundary-value tests
+6. **Layer the tests as a pyramid (wide, fast base; thin top)** — do not invert it:
+   - **Base (many, fast): contract + unit tests** — API contract conformance (above) and business-logic/state-machine unit tests (negotiate with backend; the dev may write the units). Frontend key components get component tests.
+   - **Middle: integration tests** — the acceptance-criteria and business-flow cases above.
+   - **Top (thin, mandatory but few): Playwright E2E** — only critical user paths (1 happy + 1-2 exceptions per PRD). Accessibility (Playwright + axe) is optional.
+   - **Performance**: turn the SPEC's §9 targets into **budgets the tests assert/record** (e.g. assert P95 < the SPEC's number on the contract/integration test, or record it in the metrics table) — a target nobody checks is not a target.
 7. **Write E2E tests**: refer to the playwright-testing skill
    - File named `tests/e2e/PRD-XXX.spec.ts`
    - JSDoc header linking the document IDs
@@ -59,10 +61,15 @@ No proactive action needed during this time. The dev will SendMessage you once t
 
 ## Test design principles
 
+- Each SPEC endpoint -> a contract test asserting its request/response shape, status codes, and error codes (run before E2E)
 - Each PRD acceptance criterion -> at least one test
 - Each SPEC state transition -> at least one test
 - Each error code -> at least one test that triggers it
+- Each SPEC "Security & abuse case" -> at least one negative test
+- Each SPEC performance target -> a budget the tests assert or the metrics table records
 - Each PRD prototype E2E key point -> must have an E2E test
+
+**Every change must pass the suite — the "two rounds" are fix-verify cycles, not the only time tests run.** Round 1 / round 2 are about confirming a fix didn't regress; they are not a substitute for the base layers running on every change. (When the user wires CI, the same suite gates each PR.)
 
 ## E2E test scope (don't chase 100% coverage)
 

@@ -39,7 +39,7 @@ Three human approval gates: PRD approval, technical-solution approval, and ship 
 - **ID pairing**: a single requirement runs through several documents under the same number (PRD-008 / SPEC-008 / TEST-PLAN-008 / tests/e2e/PRD-008.spec.ts).
 - **STATUS auto-generation**: agents only update the `stage` field in each document's frontmatter; the script scans them and generates STATUS.md and status.html.
 - **PM owns the progress view, on demand**: progress rolls up to the PM, but the PM is event-triggered (no daily cron). The always-on stall/skip detection is mechanical — the dashboard's `⚠️ State warnings` block — and the orchestrator surfaces it each turn; the PM is dispatched for the deeper coordination (status reports, chasing blockers).
-- **Two test rounds**: round 1 plus a re-test, each recorded in the TEST-PLAN document.
+- **Test pyramid, every change**: a wide fast base (API **contract-conformance** tests on the front/back seam + unit tests), then integration, then a thin layer of Playwright E2E for critical paths. Every change must pass the suite — the "two rounds" (round 1 + re-test, recorded in the TEST-PLAN) are fix-verify cycles, not the only time tests run, and map onto a CI gate when the user wires one.
 
 ## Change-size Tiers (pick the flow that fits)
 

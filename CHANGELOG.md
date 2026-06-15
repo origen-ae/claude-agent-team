@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project uses [Semantic Versioning](https://semver.org/).
 
+## [1.8.0] - 2026-06-15
+
+### Added
+- **Contract tests guard the front/back API seam** (P1-16): qa now derives **API contract-conformance tests** (request/response shape, status codes, error codes match the SPEC exactly) as a mandatory, run-**early** source — the most dangerous seam, since frontend and backend agree only on the SPEC contract, now fails fast and cheap instead of surfacing in a slow E2E run. Added to `qa.md`, the TEST-PLAN template (new §3.2), `roles.md`, and the DoD.
+- **Performance targets become budgets**: the SPEC §9 P95/availability targets are now asserted/recorded by qa (new TEST-PLAN §3.7 "Performance Budget" + DoD item) — "a target nobody checks is not a target".
+- **Security/abuse negative tests** wired into the test plan (§3.4), one per SPEC threat (ties P1-14 into the test layer).
+
+### Changed
+- **Test pyramid made explicit and right-side-up** (P1-16): qa layers tests as a wide fast base (contract + unit) → integration → a thin top of Playwright E2E for critical paths only. The "two rounds" are reframed everywhere (qa.md, workflow.md, roles.md) as fix-verify cycles, not the only time tests run — every change must pass the suite, which maps onto a CI gate when the user wires one.
+
 ## [1.7.0] - 2026-06-15
 
 ### Added

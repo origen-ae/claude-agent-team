@@ -74,7 +74,7 @@ Definition: `assets/.claude/agents/qa.md`
 
 Owns test-case design, round-1 testing, fixing follow-up, retest, and E2E automation (via the playwright-testing skill). qa engages early — it can start designing test cases as soon as the SPEC is done, without waiting for development to finish.
 
-**Round 1 (Stage 5):** qa consults the librarian, sets the PRD stage to `testing-round1`, creates the **TEST-PLAN** at `docs/test-plan/TEST-PLAN-XXX.md` (XXX matches the PRD), and designs cases from four sources — PRD acceptance criteria become integration tests, SPEC business flow becomes state-transition and exception-path tests, PRD prototype E2E key points become Playwright E2E cases, and SPEC API design becomes boundary-value tests. Critical user paths get Playwright E2E (mandatory). E2E files live at `tests/e2e/PRD-XXX.spec.ts` with a JSDoc header linking the document IDs:
+**Round 1 (Stage 5):** qa consults the librarian, sets the PRD stage to `testing-round1`, creates the **TEST-PLAN** at `docs/test-plan/TEST-PLAN-XXX.md` (XXX matches the PRD), and designs a test **pyramid** from the SPEC and PRD: a wide fast base of **API contract-conformance tests** (the front/back seam — shape, status, error codes match the SPEC, run before E2E) plus unit tests, then integration tests from PRD acceptance criteria and SPEC business flows, negative tests from the SPEC's "Security & abuse cases", and a thin top of Playwright E2E for critical user paths (mandatory but few). Boundary-value tests come from the API design, and SPEC §9 performance targets become budgets the tests assert/record. E2E files live at `tests/e2e/PRD-XXX.spec.ts` with a JSDoc header linking the document IDs:
 
 ```typescript
 /**
