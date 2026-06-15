@@ -53,3 +53,28 @@ jobs:
               sys.exit(1)
           print('all frontmatter valid')
           PY
+
+      - name: Validate agent required fields
+        run: |
+          python - <<'PY'
+          import glob, sys, frontmatter
+
+          REQUIRED = {'name', 'description', 'tools', 'model'}
+          agent_files = sorted(glob.glob('assets/.claude/agents/*.md'))
+          bad = []
+          for f in agent_files:
+              try:
+                  meta = frontmatter.load(f).metadata
+                  missing = REQUIRED - set(meta.keys())
+                  if missing:
+                      bad.append((f, f'missing required fields: {", ".join(sorted(missing))}'))
+              except Exception as e:
+                  bad.append((f, str(e)))
+
+          print(f'checked {len(agent_files)} agent files for required fields: {sorted(REQUIRED)}')
+          if bad:
+              for f, e in bad:
+                  print(f'FAIL  {f}  ->  {e}')
+              sys.exit(1)
+          print('all agent fields valid')
+          PY

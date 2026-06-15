@@ -41,7 +41,7 @@ The PM changes the corresponding PRD's stage to `cancelled` and adds `cancelled-
 
 ## Version & evolution
 
-- **Guide version**: v1.0
+- **Guide version**: v1.1.0 — see [CHANGELOG](../CHANGELOG.md) for what changed
 - **Target team size**: 5-10 people
 - **Estimated rollout time**: 1-2 days (including the first end-to-end run of the process)
 

@@ -35,7 +35,14 @@ This skill fixes all four: a serial flow, mandatory approval gates, a centralize
 
 ## Quick start
 
-1. Install the skill (e.g. `npx skills add github:origen-ae/claude-agent-team`, or clone into `.claude/skills/`).
+1. Clone the skill into your skills directory:
+   ```bash
+   # Global — available in all projects:
+   git clone https://github.com/origen-ae/claude-agent-team.git ~/.claude/skills/claude-agent-team
+
+   # Or project-local:
+   git clone https://github.com/origen-ae/claude-agent-team.git .claude/skills/claude-agent-team
+   ```
 2. In your project, tell Claude Code: **"set up an agent team in this project."**
 3. Approve the scaffold, install dependencies, and run your first requirement through the 8 stages.
 
@@ -115,6 +122,16 @@ You don't have to install anything to read the design:
 ## Requirements
 
 Claude Code (agent teams), Python 3 (dashboard scripts), a POSIX shell for the hook (macOS/Linux/git-bash/WSL), and optionally Node + Playwright for the E2E layer.
+
+## Upgrading
+
+To get the latest skill version:
+
+```bash
+cd ~/.claude/skills/claude-agent-team && git pull   # adjust path if project-local
+```
+
+The skill trigger and scaffolding logic update immediately. **Already-scaffolded projects** won't auto-update — agent definitions and templates were copied into your project at install time. To pick up changes from a new version, diff `assets/` against your `.claude/` directory and merge selectively. See [CHANGELOG](CHANGELOG.md) for what changed between versions.
 
 ## Contributing
 
