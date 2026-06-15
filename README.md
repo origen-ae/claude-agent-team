@@ -112,6 +112,17 @@ The same ID threads through all three, and the test plan even records a real rou
 | Right-sized flow (S/M/L tiers) | ❌ | ❌ | ✅ small changes skip the ceremony |
 | Built-in E2E test layer | ❌ | ⚠️ | ✅ Playwright |
 
+## Bundled skills
+
+After scaffolding, two additional skills land in your project's `.claude/skills/` and are immediately usable:
+
+| Skill | Trigger | Purpose |
+|---|---|---|
+| `/doc-conventions` | any agent creating or editing a doc | Frontmatter format, ID pairing rules, stage enum, modification rules |
+| `/playwright-testing` | QA writing or running E2E tests | File layout, JSDoc header, locator priority, run commands |
+
+These are project-local — they don't require a separate install and are automatically picked up by Claude Code.
+
 ## Browse the agents
 
 You don't have to install anything to read the design:

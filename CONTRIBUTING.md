@@ -25,11 +25,29 @@ python -m py_compile assets/scripts/*.py
 # 2. Validate the settings JSON
 python -m json.tool assets/.claude/settings.json > /dev/null
 
-# 3. Make sure doc frontmatter parses
+# 3. Validate agent required fields
+pip install python-frontmatter -q
+python - <<'PY'
+import glob, sys, frontmatter
+REQUIRED = {'name', 'description', 'tools', 'model'}
+bad = []
+for f in sorted(glob.glob('assets/.claude/agents/*.md')):
+    meta = frontmatter.load(f).metadata
+    missing = REQUIRED - set(meta.keys())
+    if missing:
+        bad.append((f, f'missing: {", ".join(sorted(missing))}'))
+if bad:
+    [print(f'FAIL  {f}  ->  {e}') for f, e in bad]; sys.exit(1)
+print('all agent fields valid')
+PY
+
+# 4. Make sure doc frontmatter parses
 #    (confirm the YAML frontmatter in your changed docs is well-formed)
 ```
 
 If any of these fail, fix them before pushing — they're the same checks CI runs.
+
+If your change affects user-visible behaviour (new feature, bug fix, changed default), add an entry to `CHANGELOG.md` under an `[Unreleased]` section at the top (create it if it doesn't exist). The maintainer will retitle it with the version number when cutting a release.
 
 ## Commit Messages
 

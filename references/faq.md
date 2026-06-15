@@ -24,7 +24,7 @@ Skip PRD/SPEC and let backend/frontend fix it directly, but afterward you must:
 - If there are important findings, add a RUNBOOK or ADR
 
 **Q7: The project already has code. How do I start?**
-On the first run, execute step 9 to have the architect generate SPEC-000 documenting the current state. You are not required to backfill PRDs for existing features; start strictly following the process from new features onward.
+On the first run, execute step 5 of the scaffolding procedure (Bootstrap project baseline) to have the `architect` agent browse `src/` and generate `docs/spec/SPEC-000-current-state.md`. You are not required to backfill PRDs for existing features; start strictly following the process from new features onward.
 
 **Q8: Can STATUS.md be shown to non-technical people?**
 Yes. Markdown renders tables automatically on GitHub/GitLab, so the key information (number of items awaiting approval, number in progress) is clear at a glance. For showing it to the boss, we recommend status.html (it looks nicer).
@@ -36,6 +36,9 @@ The PM changes the corresponding PRD's stage to `cancelled` and adds `cancelled-
 1. Check whether the agent definition's "position in the process" is clear
 2. In the task description, explicitly state "follow the CLAUDE.md process; we are currently at stage X"
 3. If problems recur, check whether the agent memory has accumulated faulty patterns
+
+**Q11: The STATUS dashboard isn't auto-updating on Windows.**
+The PostToolUse hook uses POSIX shell syntax (`2>/dev/null || true`). It requires **Git Bash or WSL** — it will not work in PowerShell or CMD. To verify: open a Git Bash terminal and run `python scripts/build_status.py` manually. If that works, Git Bash is correctly installed. If Claude Code's hook still doesn't fire, confirm that Git Bash is in your system PATH so Claude Code can find the shell. Alternatively, run `python scripts/build_status.py` manually after each stage change.
 
 ---
 
