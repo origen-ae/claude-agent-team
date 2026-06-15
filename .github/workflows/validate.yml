@@ -49,7 +49,24 @@ jobs:
           assert 'PRD-001' in status and len(status) > 200, 'STATUS.md looks empty'
           nid = subprocess.run([sys.executable, 'scripts/next_id.py', 'prd'], cwd=tmp, capture_output=True, text=True)
           assert nid.stdout.strip() == 'PRD-002', f'next_id wrong: {nid.stdout!r}'
-          print('scripts ran clean against the example; STATUS non-empty; next_id=PRD-002')
+
+          # Path guard: block cross-boundary, allow same-side / unknown agent
+          import json
+          (tmp / '.claude').mkdir(exist_ok=True)
+          shutil.copy('assets/.claude/agent-team-boundaries.json', tmp / '.claude' / 'agent-team-boundaries.json')
+          def guard(agent, path):
+              payload = {'tool_name': 'Write', 'tool_input': {'file_path': path}, 'cwd': str(tmp)}
+              if agent:
+                  payload['agent_type'] = agent
+              r = subprocess.run([sys.executable, 'scripts/guard_paths.py'], cwd=tmp,
+                                 input=json.dumps(payload), capture_output=True, text=True)
+              return r.returncode
+          assert guard('frontend', 'src/backend/api.py') == 2, 'guard should block frontend->backend'
+          assert guard('backend', 'src/frontend/App.tsx') == 2, 'guard should block backend->frontend'
+          assert guard('frontend', 'src/frontend/App.tsx') == 0, 'guard should allow frontend->frontend'
+          assert guard(None, 'src/backend/api.py') == 0, 'guard should allow when agent unknown (fail open)'
+          assert guard('frontend', 'src/backendish/x.ts') == 0, 'guard should not false-positive on backendish'
+          print('scripts ran clean; STATUS non-empty; next_id=PRD-002; path guard blocks/allows correctly')
           PY
 
       - name: Validate document frontmatter

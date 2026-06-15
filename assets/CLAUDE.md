@@ -1,6 +1,6 @@
 # Project Collaboration Conventions
 
-<!-- claude-agent-team: v1.3.0 — do not remove; upgrades use this to detect the installed version -->
+<!-- claude-agent-team: v1.4.0 — do not remove; upgrades use this to detect the installed version -->
 
 ## Project Status (filled in by the architect after first launch)
 
@@ -281,6 +281,21 @@ Role permission boundaries:
 - **reviewer/librarian**: read-only (subagents)
 
 (The specific frontend/backend directories are pinned down by the architect in SPEC-000, who also updates the "Code directories" field at the top of CLAUDE.md)
+
+### Mechanized frontend/backend boundary
+
+The frontend↔backend split is not just prose — it's enforced by a **PreToolUse hook** (`scripts/guard_paths.py`) that reads the calling agent (`agent_type`) and blocks an Edit/Write that crosses the boundary defined in **`.claude/agent-team-boundaries.json`**. The architect fills that file's globs during the bootstrap step (same time as SPEC-000 / "Code directories"):
+
+```json
+{
+  "frontend": { "deny_write": ["src/backend/**", "migrations/**"] },
+  "backend":  { "deny_write": ["src/frontend/**"] }
+}
+```
+
+- The guard **fails open** by design: if the agent identity is unavailable, the boundaries file is missing, or a `deny_write` list is empty, nothing is blocked. It is defense-in-depth on top of the prose rules, not a replacement.
+- **Monorepo / full-stack layouts** (no clean front/back directory split, e.g. Next.js app dir, tRPC): leave the relevant `deny_write` lists **empty** to disable enforcement, and rely on the prose rules + review. Don't invent a split that doesn't exist.
+- The guard relies on Claude Code populating `agent_type` for subagent tool calls (experimental agent-teams behaviour); if that's absent it is simply inert.
 
 ## Git Commit Convention
 

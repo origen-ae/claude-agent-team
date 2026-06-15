@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project uses [Semantic Versioning](https://semver.org/).
 
+## [1.4.0] - 2026-06-15
+
+### Added
+- **Mechanized frontend/backend boundary** (P1-4): a PreToolUse guard (`scripts/guard_paths.py`) reads the calling agent (`agent_type`) and blocks an Edit/Write that crosses the boundary defined in the new `.claude/agent-team-boundaries.json`. The split is no longer prose-only.
+  - **Fails open by design**: if agent identity is unavailable, the boundaries file is missing, or a `deny_write` list is empty, nothing is blocked — it's defense-in-depth on top of the prose rules, never a single point of breakage.
+  - Pure-Python and cross-platform; blocks via exit code 2 with a reason.
+  - Handles **monorepo / full-stack layouts**: leave `deny_write` empty to disable enforcement where there's no clean split.
+  - The architect populates the boundary globs during the bootstrap step (alongside SPEC-000 and the CLAUDE.md "Code directories").
+
+### Changed
+- `.claude/settings.json` now registers the PreToolUse path guard in addition to the PostToolUse dashboard refresh; install merges both hook arrays.
+- CLAUDE.md "Tool Permissions" documents the mechanized boundary, its fail-open behaviour, and the monorepo escape hatch.
+
 ## [1.3.0] - 2026-06-15
 
 A design-audit pass: fixes correctness/honesty bugs found in a holistic review, clarifies the delivery boundary, and hardens multi-developer use.

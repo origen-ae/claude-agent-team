@@ -1,0 +1,14 @@
+{
+  "$comment": "Machine-readable write boundaries enforced by the PreToolUse hook (scripts/guard_paths.py). The architect fills in the real globs during the project-baseline bootstrap, at the same time as SPEC-000 and the CLAUDE.md 'Code directories' field. Each agent's 'deny_write' lists the path globs that agent must NOT write (** = any depth, * = one segment). Leave a list EMPTY to disable the boundary for that agent (e.g. a monorepo or full-stack layout with no clean front/back split) — the guard then allows everything for it. The guard fails OPEN: if this file is missing or a list is empty, nothing is blocked.",
+  "frontend": {
+    "deny_write": [
+      "src/backend/**",
+      "migrations/**"
+    ]
+  },
+  "backend": {
+    "deny_write": [
+      "src/frontend/**"
+    ]
+  }
+}
