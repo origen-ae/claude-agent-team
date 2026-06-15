@@ -24,6 +24,34 @@ jobs:
       - name: Validate settings.json
         run: python -c "import json; json.load(open('assets/.claude/settings.json', encoding='utf-8')); print('settings.json is valid JSON')"
 
+      - name: Run scripts against the worked example
+        run: |
+          python - <<'PY'
+          import shutil, subprocess, sys, tempfile
+          from pathlib import Path
+
+          tmp = Path(tempfile.mkdtemp())
+          shutil.copytree('assets/scripts', tmp / 'scripts')
+          shutil.copytree('examples/loyalty-points-checkout/docs', tmp / 'docs')
+          shutil.copy('assets/docs/backlog.md', tmp / 'docs' / 'backlog.md')
+
+          def run(args, expect_zero=True):
+              r = subprocess.run([sys.executable, *args], cwd=tmp)
+              if expect_zero and r.returncode != 0:
+                  print(f'FAIL  {args} -> exit {r.returncode}')
+                  sys.exit(1)
+              return r.returncode
+
+          run(['scripts/build_index.py'])
+          run(['scripts/build_status.py'])
+          run(['scripts/check_state.py'])           # example is internally consistent
+          status = (tmp / 'STATUS.md').read_text(encoding='utf-8')
+          assert 'PRD-001' in status and len(status) > 200, 'STATUS.md looks empty'
+          nid = subprocess.run([sys.executable, 'scripts/next_id.py', 'prd'], cwd=tmp, capture_output=True, text=True)
+          assert nid.stdout.strip() == 'PRD-002', f'next_id wrong: {nid.stdout!r}'
+          print('scripts ran clean against the example; STATUS non-empty; next_id=PRD-002')
+          PY
+
       - name: Validate document frontmatter
         run: |
           python - <<'PY'

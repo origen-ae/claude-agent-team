@@ -4,11 +4,15 @@ Scan the frontmatter of all PRDs, aggregate the stage of multiple documents by
 requirement ID, and generate STATUS.md and status.html.
 """
 import sys
-import yaml
+from html import escape as html_escape
 import frontmatter
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, date
 from collections import defaultdict
+
+# A requirement that hasn't moved in this many days (and isn't in a terminal
+# state) is flagged as stalled on the board.
+STALE_DAYS = 5
 
 # Make emoji/UTF-8 output safe on consoles with a non-UTF-8 default encoding
 # (e.g. Windows GBK). No-op if reconfigure is unavailable or fails.
@@ -33,8 +37,8 @@ STAGES = [
     ("testing-round1", "🟨", "Testing (round 1)"),
     ("fixing", "🔴", "Fixing"),
     ("testing-round2", "🟨", "Retesting (round 2)"),
-    ("awaiting-deploy-approval", "🟡", "Awaiting deploy approval"),
-    ("deployed", "✅", "Deployed"),
+    ("awaiting-deploy-approval", "🟡", "Awaiting ship approval"),
+    ("deployed", "✅", "Done"),
     ("cancelled", "❌", "Cancelled"),
     ("superseded", "🔁", "Superseded"),
 ]
@@ -137,33 +141,99 @@ def get_canonical_stage(group):
 
 
 def get_stage_progress(group):
-    """Return the completion status of each stage for this requirement"""
+    """Return the completion status of each milestone for this requirement.
+
+    A passed milestone is only rendered ✅ if the artifact that proves it
+    happened actually exists. If the stage index claims a milestone is behind
+    us but its artifact is missing (e.g. the stage jumped to
+    awaiting-deploy-approval but no TEST-PLAN was ever written), it renders ⚠️
+    instead of a falsely reassuring green check. This keeps the board from
+    fabricating evidence of work that never occurred.
+    """
     prd_stage = get_canonical_stage(group)
     current_idx = STAGE_ORDER.get(prd_stage, -1)
 
-    # Simplified progress display: based on the current stage, infer that all preceding stages are complete
-    progress = []
+    # milestone -> the artifact that must exist for it to count as truly done.
+    # None means we have no independent signal (code isn't tracked here), so we
+    # trust the stage index.
     milestones = [
-        ("pm-designing", "PM design"),
-        ("awaiting-prd-approval", "PRD approval"),
-        ("architect-designing", "Architecture"),
-        ("awaiting-spec-approval", "SPEC approval"),
-        ("developing", "Develop"),
-        ("testing-round1", "Test 1"),
-        ("testing-round2", "Test 2"),
-        ("awaiting-deploy-approval", "Deploy approval"),
-        ("deployed", "Deploy"),
+        ("pm-designing", "PM design", None),
+        ("awaiting-prd-approval", "PRD approval", None),
+        ("architect-designing", "Architecture", "spec"),
+        ("awaiting-spec-approval", "SPEC approval", "spec"),
+        ("developing", "Develop", None),
+        ("testing-round1", "Test 1", "test-plan"),
+        ("testing-round2", "Test 2", "test-plan"),
+        ("awaiting-deploy-approval", "Ship approval", None),
+        ("deployed", "Done", None),
     ]
-    for stage_key, label in milestones:
+    progress = []
+    for stage_key, label, artifact in milestones:
         idx = STAGE_ORDER[stage_key]
         if idx < current_idx:
-            progress.append(("✅", label))
+            if artifact and artifact not in group:
+                progress.append(("⚠️", label))  # claimed done but artifact missing
+            else:
+                progress.append(("✅", label))
         elif idx == current_idx:
             icon, _ = STAGE_LABEL[stage_key]
             progress.append((icon, label))
         else:
             progress.append(("⚪", label))
     return progress
+
+
+def _days_since(updated_str):
+    """Whole days between an ISO date string (YYYY-MM-DD) and today, or None."""
+    if not updated_str:
+        return None
+    try:
+        d = date.fromisoformat(str(updated_str)[:10])
+    except Exception:
+        return None
+    return (date.today() - d).days
+
+
+def compute_state_warnings(groups):
+    """Reconcile intended state vs. evidence and return [(level, message)].
+
+    level is 'error' (a real inconsistency that should block a deploy gate) or
+    'warn' (worth a look). The board renders these; check_state.py reuses this
+    function as a pre-deploy gate.
+    """
+    warnings = []
+    arch_idx = STAGE_ORDER["architect-designing"]
+    test1_idx = STAGE_ORDER["testing-round1"]
+    deployed_idx = STAGE_ORDER["deployed"]
+
+    for rid, g in sorted(groups.items()):
+        stage = get_canonical_stage(g)
+        idx = STAGE_ORDER.get(stage, -1)
+
+        if idx == -1:
+            warnings.append(("error", f"PRD-{rid}: unknown stage '{stage}'"))
+            continue
+
+        # Past architecture but no SPEC doc exists.
+        if idx > arch_idx and "spec" not in g:
+            warnings.append(("error", f"PRD-{rid}: stage '{stage}' is past architecture but SPEC-{rid} is missing"))
+
+        # Past round-1 testing but no TEST-PLAN doc exists.
+        if idx > test1_idx and "test-plan" not in g:
+            warnings.append(("error", f"PRD-{rid}: stage '{stage}' is past testing but TEST-PLAN-{rid} is missing"))
+
+        # Marked done without a test plan at all.
+        if stage == "deployed" and "test-plan" not in g:
+            warnings.append(("error", f"PRD-{rid}: marked done but has no TEST-PLAN"))
+
+        # Stalled: not terminal, not waiting on a human, and untouched for a while.
+        if stage not in ("deployed", "cancelled", "superseded") and not stage.startswith("awaiting-"):
+            prd = g.get("prd", {})
+            days = _days_since(prd.get("updated"))
+            if days is not None and days >= STALE_DAYS:
+                warnings.append(("warn", f"PRD-{rid}: stalled {days} days in '{stage}' (no update since {prd.get('updated')})"))
+
+    return warnings
 
 
 def render_markdown(groups):
@@ -190,6 +260,18 @@ def render_markdown(groups):
     lines.extend(summary_items)
     lines.append("")
 
+    # State warnings (intended state vs. evidence) — surface these up top
+    warnings = compute_state_warnings(groups)
+    if warnings:
+        errors = [m for lvl, m in warnings if lvl == "error"]
+        warns = [m for lvl, m in warnings if lvl == "warn"]
+        lines.append("## ⚠️ State warnings\n")
+        for m in errors:
+            lines.append(f"- 🔴 {m}")
+        for m in warns:
+            lines.append(f"- 🟡 {m}")
+        lines.append("")
+
     # Awaiting approval (what needs your attention most)
     awaiting = [
         (rid, g) for rid, g in groups.items()
@@ -197,14 +279,15 @@ def render_markdown(groups):
     ]
     if awaiting:
         lines.append("## 🛑 Awaiting your approval\n")
-        lines.append("| ID | Title | Waiting for | Waiting since |")
-        lines.append("|---|---|---|---|")
+        lines.append("| ID | Title | Summary | Waiting for | Since |")
+        lines.append("|---|---|---|---|---|")
         for rid, g in awaiting:
             prd = g.get("prd", {})
             stage = get_canonical_stage(g)
             _, label = STAGE_LABEL.get(stage, ("⚪", stage))
+            summ = (prd.get("summary", "") or "").replace("|", "\\|")
             lines.append(
-                f"| PRD-{rid} | {prd.get('title', '')} | {label} | {prd.get('updated', '')} |"
+                f"| PRD-{rid} | {prd.get('title', '')} | {summ} | {label} | {prd.get('updated', '')} |"
             )
         lines.append("")
 
@@ -394,16 +477,25 @@ def render_html(groups):
 </div>
 """
 
+    # State warnings (intended state vs. evidence)
+    warnings = compute_state_warnings(groups)
+    if warnings:
+        html += '<div class="section"><h2>⚠️ State warnings</h2><ul style="margin:0;padding-left:20px">'
+        for lvl, msg in warnings:
+            dot = "🔴" if lvl == "error" else "🟡"
+            html += f'<li style="margin:4px 0">{dot} {html_escape(msg)}</li>'
+        html += '</ul></div>'
+
     # Awaiting your approval
     awaiting = [(rid, g) for rid, g in groups.items() if get_canonical_stage(g).startswith("awaiting-")]
     if awaiting:
         html += '<div class="section"><h2>🛑 Awaiting your approval</h2><table>'
-        html += '<tr><th>ID</th><th>Title</th><th>Waiting for</th><th>Waiting since</th></tr>'
+        html += '<tr><th>ID</th><th>Title</th><th>Summary</th><th>Waiting for</th><th>Since</th></tr>'
         for rid, g in awaiting:
             prd = g.get("prd", {})
             stage = get_canonical_stage(g)
             _, label = STAGE_LABEL.get(stage, ("⚪", stage))
-            html += f'<tr><td><strong>PRD-{rid}</strong></td><td>{prd.get("title", "")}</td><td>{label}</td><td>{prd.get("updated", "")}</td></tr>'
+            html += f'<tr><td><strong>PRD-{rid}</strong></td><td>{html_escape(prd.get("title", ""))}</td><td>{html_escape(prd.get("summary", ""))}</td><td>{label}</td><td>{prd.get("updated", "")}</td></tr>'
         html += '</table></div>'
 
     # Details
@@ -446,10 +538,10 @@ def render_html(groups):
         html += f"""
 <div class="req {css_class}">
   <div class="req-header">
-    <div class="req-title">PRD-{rid}: {prd.get("title", "")}</div>
+    <div class="req-title">PRD-{rid}: {html_escape(prd.get("title", ""))}</div>
     <div class="req-stage {css_class}">{icon} {label}</div>
   </div>
-  <div class="summary-text">{prd.get("summary", "")}</div>
+  <div class="summary-text">{html_escape(prd.get("summary", ""))}</div>
   <div class="progress-bar">{progress_html}</div>
   <div class="req-links">
 """

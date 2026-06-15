@@ -16,11 +16,10 @@
     "PostToolUse": [
       {
         "matcher": "Edit|Write",
-        "pathMatcher": "docs/**/*.md",
         "hooks": [
           {
             "type": "command",
-            "command": "python scripts/build_status.py 2>/dev/null || true"
+            "command": "python scripts/refresh_status.py"
           }
         ]
       }
