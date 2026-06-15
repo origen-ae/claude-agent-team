@@ -35,12 +35,12 @@ This skill fixes all four: a serial flow, mandatory approval gates, a centralize
 
 ## Quick start
 
-**VSCode extension:**
-1. Open Claude Code → Manage Plugins → Marketplaces → add `origen-ae/claude-plugins`
-2. Install: `/plugin install claude-agent-team` (or browse via Plugins tab)
+**Via plugin marketplace:**
+1. Add the marketplace: `/plugin marketplace add origen-ae/claude-plugins`
+2. Install: `/plugin install claude-agent-team`
 3. In your project, tell Claude Code: **"set up an agent team in this project."**
 
-**CLI / manual:**
+**Via git clone:**
 1. Clone the skill into your skills directory:
    ```bash
    # Global — available in all projects:
@@ -143,9 +143,9 @@ Claude Code (agent teams), Python 3 (dashboard scripts), a POSIX shell for the h
 
 ## Upgrading
 
-**VSCode extension:** open Manage Plugins → find `claude-agent-team` → click the refresh icon.
+**Via plugin marketplace:** `/plugin update claude-agent-team`
 
-**CLI / git clone:**
+**Via git clone:**
 ```bash
 cd ~/.claude/skills/claude-agent-team && git pull   # adjust path if project-local
 ```
