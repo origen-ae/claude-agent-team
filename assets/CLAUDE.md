@@ -1,6 +1,6 @@
 # Project Collaboration Conventions
 
-<!-- claude-agent-team: v1.5.0 — do not remove; upgrades use this to detect the installed version -->
+<!-- claude-agent-team: v1.6.0 — do not remove; upgrades use this to detect the installed version -->
 
 ## Project Status (filled in by the architect after first launch)
 
@@ -145,6 +145,13 @@ After an agent finishes its stage task, it **must**:
 - qa does not start round 1 until **both** flags are true. If only one is set, qa pings the missing dev rather than testing a half-built feature.
 
 **Additional action at `deployed` (= done):** the architect updates `docs/spec/SPEC-000-current-state.md` — append new APIs, data model changes, and module updates introduced by this PRD. SPEC-000 is the single source of truth for the overall system architecture and must stay current. (In multi-developer mode this happens on the **integration branch after merge**, not on each feature branch — see "Multi-Developer Mode".)
+
+### Progress health is event-triggered, not scheduled
+
+Agents are event-driven — nothing runs "once a day," so don't rely on a patrolling agent to notice stalls. Instead:
+- **Always-on detection is mechanical**: `build_status.py` renders a `⚠️ State warnings` block (stalled requirements, stages past their artifacts) and `check_state.py` asserts the same invariants as a gate. These run on every doc edit via the hook.
+- **The orchestrator (main Claude)** is present every turn and should surface any State-warnings to the user rather than letting them sit silently.
+- **pm (Hat B)** is the progress *owner* but is dispatched on demand — for status reports, gate summaries, and chasing down blockers — not as a standing daemon.
 
 ## Document System
 

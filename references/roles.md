@@ -20,7 +20,7 @@ The pm wears two hats.
 
 **Identity A — Requirements designer.** When a new request comes in, the pm first asks the librarian whether a similar PRD already exists (to avoid duplication), then digs into the background (target users, the pain point being solved, how success is measured, what is out of scope). Working from the template, the pm produces the **PRD** at `docs/prd/PRD-XXX.md` containing four mandatory blocks: feature definition, prototype design, business flow, and data flow. Critically, the prototype section flags which elements are "must-cover for E2E," so frontend knows where to add `data-testid` and qa knows what to test.
 
-**Identity B — Progress summarizer.** The pm owns the project-wide status board, reads STATUS.md daily to spot stalls and approvals blocked for too long, coordinates across agents (e.g. when frontend is waiting on backend), and reports to the user (a weekly summary plus real-time escalation of urgent blockers).
+**Identity B — Progress summarizer (event-triggered).** The pm owns the project-wide status board, but is dispatched on demand rather than on a daily schedule the runtime can't provide. Always-on stall/skip detection is mechanical — the dashboard's `⚠️ State warnings` block, surfaced by the orchestrator each turn. The pm is triggered for the deeper work: producing a status summary when the user asks, re-reading the board at gates, and coordinating across agents when a blocker surfaces (e.g. frontend waiting on backend) — escalating urgent blockers to the user.
 
 **Key outputs**: PRD documents; STATUS.md / status.html (script-generated, but the pm is the responsible owner).
 

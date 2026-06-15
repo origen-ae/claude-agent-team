@@ -38,7 +38,7 @@ Three human approval gates: PRD approval, technical-solution approval, and ship 
 
 - **ID pairing**: a single requirement runs through several documents under the same number (PRD-008 / SPEC-008 / TEST-PLAN-008 / tests/e2e/PRD-008.spec.ts).
 - **STATUS auto-generation**: agents only update the `stage` field in each document's frontmatter; the script scans them and generates STATUS.md and status.html.
-- **PM is the central hub**: all progress rolls up to the PM, who maintains the global view for you.
+- **PM owns the progress view, on demand**: progress rolls up to the PM, but the PM is event-triggered (no daily cron). The always-on stall/skip detection is mechanical — the dashboard's `⚠️ State warnings` block — and the orchestrator surfaces it each turn; the PM is dispatched for the deeper coordination (status reports, chasing blockers).
 - **Two test rounds**: round 1 plus a re-test, each recorded in the TEST-PLAN document.
 
 ## Change-size Tiers (pick the flow that fits)

@@ -1,6 +1,6 @@
 {
   "name": "claude-agent-team",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "description": "Scaffolds a complete multi-agent dev team into your project: 7 agents (PM, architect, frontend, backend, QA, reviewer, librarian), an 8-stage serial workflow with human approval gates and change-size tiers (S/M/L), a shared document system (PRD/SPEC/TEST-PLAN/ADR/RUNBOOK/BACKLOG), and an auto-generated STATUS dashboard.",
   "author": {
     "name": "Origen AE"

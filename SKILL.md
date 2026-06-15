@@ -1,6 +1,6 @@
 ---
 name: claude-agent-team
-version: 1.5.0
+version: 1.6.0
 description: Use when setting up a multi-agent team workflow in Claude Code — scaffolds 7 agents (PM, architect, frontend, backend, QA, reviewer, librarian), an 8-stage serial flow with human approval gates and change-size tiers (S/M/L), a document system (PRD/SPEC/TEST-PLAN/ADR/RUNBOOK/BACKLOG), and an auto-generated STATUS dashboard. Triggers on requests like "set up an agent team", "multi-agent dev workflow", or "agent team for my project".
 ---
 

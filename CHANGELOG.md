@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project uses [Semantic Versioning](https://semver.org/).
 
+## [1.6.0] - 2026-06-15
+
+### Changed
+- **PM's progress-aggregator hat is now honestly event-triggered** (P1-3). The design previously told the pm to "read STATUS once a day" and called it the "central hub" — but agents are event-driven, with no scheduler, so that role never actually fired. Reframed:
+  - Always-on stall/skip detection is **mechanical** — the dashboard's `⚠️ State warnings` block (`build_status.py` / `check_state.py`), added in 1.3.0 — not a patrolling agent.
+  - The **orchestrator (main Claude)**, which is present every turn, surfaces those warnings to the user.
+  - **pm (Hat B)** is dispatched on demand (status reports, gate summaries, chasing blockers), not as a standing daemon.
+  - No 8th agent added — a `delivery-lead` would be just as unscheduled; the fix is honest triggers + the existing mechanical warnings.
+- Updated `pm.md`, `references/workflow.md` (dropped "PM is the central hub"), `references/roles.md`, and added a "Progress health is event-triggered" note to CLAUDE.md.
+
 ## [1.5.0] - 2026-06-15
 
 ### Changed

@@ -72,12 +72,12 @@ Your morning routine:
 ```
 1. Open status.html (in a browser)
 2. Read the top summary: 8 requirements total | 2 awaiting approval | 4 in progress | 2 done
-3. Look at the "Awaiting your approval" section and handle the pending items (click the document links for a quick read)
-4. Look at the "In progress" section and spot anomalies (items that have been stalled for too long)
+3. Check the "⚠️ State warnings" block — stalls and skipped-stage inconsistencies are flagged for you mechanically (you don't have to hunt for them)
+4. Look at the "Awaiting your approval" section and handle the pending items (click the document links for a quick read)
 5. Done, close it
 ```
 
-5-10 minutes a day.
+A few minutes whenever you check in. (This is your glance at the board — not an agent task; nothing runs on a schedule. Ask the pm for a deeper status summary when you want one.)
 
 ## Scenario 3: An emergency bug
 
