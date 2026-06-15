@@ -33,8 +33,13 @@ related: []
 
 ### 1.4 Success Metrics
 
-<!-- Measurable, e.g. "next-day retention up 5%", "support tickets down 20%" -->
+<!-- Measurable, e.g. "next-day retention up 5%", "support tickets down 20%".
+Each metric must be **production-observable** — a signal you could actually read
+in prod (a rate, latency, error count, conversion), not a vibe. Mark 1-2 with
+**[instrument]** — these become an Observability requirement in the SPEC so the
+feature emits the metric/event/log needed to measure them after launch. -->
 
+- [instrument] 
 - 
 
 ## 2. User Stories

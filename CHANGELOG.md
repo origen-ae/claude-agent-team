@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project uses [Semantic Versioning](https://semver.org/).
 
+## [1.9.0] - 2026-06-16
+
+### Added
+- **Observability is declared end-to-end** (P1-15) — closing the gap where the flow stopped at `deployed` and the RUNBOOK assumed alert signals nobody produced. The team *declares* what to observe (wiring monitoring stays the user's, per the delivery boundary):
+  - **PRD**: success metrics must be **production-observable**; 1-2 are marked `[instrument]` (pm.md + TEMPLATE-PRD).
+  - **SPEC**: new "Observability" section (§12) turns each `[instrument]` metric into concrete signals to emit (metric/event/log names + where) and lists alert-worthy conditions; required for production-facing features. Wired into `architect.md` ("A SPEC must contain").
+  - **dev**: backend emits the SPEC's declared signals (coding standard).
+  - **RUNBOOK**: "Alert Signals" must be non-empty for a production module and reference the SPEC's signal names (not vague descriptions) — making the runbook's "confirm metrics recovered" step actually executable.
+  - **DoD** gate item for observability; CLAUDE.md scope boundary now distinguishes **declare** (the team, ships instrumented) vs **wire** (the user's dashboards/alerts). New FAQ Q15.
+
 ## [1.8.0] - 2026-06-15
 
 ### Added

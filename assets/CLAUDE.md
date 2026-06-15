@@ -1,6 +1,6 @@
 # Project Collaboration Conventions
 
-<!-- claude-agent-team: v1.8.0 — do not remove; upgrades use this to detect the installed version -->
+<!-- claude-agent-team: v1.9.0 — do not remove; upgrades use this to detect the installed version -->
 
 ## Project Status (filled in by the architect after first launch)
 
@@ -77,7 +77,9 @@ The 8-stage flow below applies in full to **L**. **M** uses a trimmed version: a
 
 This team takes a requirement from idea to **approved, tested, merge-ready code**. The terminal stage is still keyed `deployed` in frontmatter (for backward compatibility), but it means **"done — approved and ready to ship"**, *not* "running in production".
 
-**Out of scope — these stay yours:** running CI/CD, building artifacts, deploying to environments (dev/staging/prod), database migration execution, monitoring/alerting, and production rollback. The `backend`'s migration + rollback scripts and the `RUNBOOK` are produced as deliverables but are **not executed** by any stage. If you want a release gate, wire your own CI to run the test suite on the PR and treat a green run as part of the ship approval.
+**Out of scope — these stay yours:** running CI/CD, building artifacts, deploying to environments (dev/staging/prod), database migration execution, wiring monitoring/alerting dashboards, and production rollback. The `backend`'s migration + rollback scripts and the `RUNBOOK` are produced as deliverables but are **not executed** by any stage. If you want a release gate, wire your own CI to run the test suite on the PR and treat a green run as part of the ship approval.
+
+**Declare vs. wire:** the team *declares* what should be observable (the PRD's `[instrument]` success metrics → the SPEC's "Observability" signals → the dev emits them → the RUNBOOK's Alert Signals reference them), so the feature ships *instrumented*. Standing up the dashboards and alerts on those signals is yours.
 
 ### Mandatory Human Approval Gates
 
@@ -109,6 +111,7 @@ The agent presenting a gate states which items are met; the user uses them to ap
 - [ ] Reviewer raised no unresolved Critical findings
 - [ ] Backend: migration + rollback scripts present (if schema changed)
 - [ ] Security: for auth/money/PII features, the SPEC's "Security & abuse cases" are addressed and have negative tests; any new dependency is noted for supply-chain scanning
+- [ ] Observability: for production-facing features, the SPEC's `[instrument]` signals are emitted and a production module has a RUNBOOK with non-empty Alert Signals (wiring the dashboards/alerts is the user's)
 - [ ] SPEC-000 update is queued (architect applies it once shipped)
 
 ### Approval Gates Are Loops, Not One-Way Doors

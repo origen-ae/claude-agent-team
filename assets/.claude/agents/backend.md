@@ -36,6 +36,7 @@ Upon receiving the SPEC (already approved):
 - Critical operations must be idempotent
 - Error responses must use the project's unified error codes (defined in the SPEC)
 - Sensitive operations must have audit logs
+- **Emit the signals declared in the SPEC's "Observability" section** (the metric/event/log names that make the PRD's `[instrument]` success metrics measurable in prod) — wiring dashboards/alerts is the user's, but the feature must produce the signal
 
 ## Testing requirements
 

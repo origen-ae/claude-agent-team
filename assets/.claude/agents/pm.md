@@ -24,7 +24,7 @@ When you receive a requirement:
 2. **Dig into the background** — if the information the user gave is insufficient, proactively ask back:
    - Who is the target user?
    - What pain point does it solve?
-   - How is success measured?
+   - How is success measured? **Each success metric must be production-observable** (a rate, latency, error count, conversion you could read in prod). Mark 1-2 as `[instrument]` so the architect turns them into an Observability requirement and the feature emits what's needed to measure them after launch.
    - What is out of scope?
 3. **Create from the template**: `docs/_templates/TEMPLATE-PRD.md`
 4. **Fill in all 4 blocks**:

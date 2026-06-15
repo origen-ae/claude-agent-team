@@ -22,8 +22,13 @@ related: []
 
 ## 2. Alert Signals
 
-- **Monitoring metrics**: 
-- **Log characteristics**: 
+<!-- REQUIRED non-empty for a production module. These must reference the
+concrete signals the feature emits — i.e. the names from the SPEC's
+"Observability" section — not vague descriptions. If a signal you'd want
+doesn't exist yet, that's a gap to feed back to the architect/dev, not a blank. -->
+
+- **Monitoring metrics**: <!-- e.g. points_deduct_failed rate > 1%; points.calc.latency_ms P95 > 200ms -->
+- **Log characteristics**: <!-- e.g. structured log `points_deduct_failed{reason=...}` -->
 - **User feedback characteristics**: 
 
 ## 3. Response Steps

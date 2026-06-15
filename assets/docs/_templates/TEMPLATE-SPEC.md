@@ -190,3 +190,22 @@ tells the reviewer what to scrutinize.
 - **AuthZ rule**: every state-changing endpoint checks the caller may act on the target resource (don't trust IDs from the client).
 - **Secrets / PII**: no secrets in code or logs; PII fields are not logged.
 - **Dependencies**: note any new third-party dependency here so it gets a supply-chain review (see README → Security).
+
+## 12. Observability
+
+<!--
+REQUIRED for production-facing features. Turn the PRD's [instrument] success
+metrics into concrete signals the feature MUST emit so the metric is measurable
+after launch. The team emits these signals; wiring dashboards/alerts is the
+user's (see the delivery boundary). For a non-production/internal feature,
+write "Not applicable: <why>".
+-->
+
+| PRD metric | Signal to emit | Type | Where |
+|---|---|---|---|
+| Points-redemption conversion | `checkout.points.redeemed` (count) + order total | metric/event | OrderSubmitAPI |
+| Calc latency stays under budget | `points.calc.latency_ms` (histogram) | metric | PointsCalcAPI |
+| Deduction failures | structured log `points_deduct_failed{reason}` | log | PointsDeductService |
+
+- **Alert-worthy conditions** (feed the RUNBOOK "Alert Signals"): e.g. deduction-failure rate > 1%, calc P95 > the §9 budget.
+- These signal names are what the RUNBOOK references and what the dev instruments.

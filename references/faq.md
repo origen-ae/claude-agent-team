@@ -57,11 +57,14 @@ It's experimental. If it's unavailable, the orchestrator (main Claude) acts as r
 **Q14: How does the team handle security?**
 At the layers it controls: for features touching auth, money/balances, PII, file uploads, or untrusted input, the architect's SPEC includes a "Security & abuse cases" section (STRIDE-lite: threat → mitigation → verifying test), and the reviewer runs a security deep-dive on those diffs (authorization/IDOR, injection, secrets & PII, money/state integrity, new dependencies). Dependency/supply-chain scanning and SAST run in **your** CI (consistent with the delivery boundary) — see README → Security for the recommended `npm audit` / `pip-audit` / Dependabot setup. A dedicated security agent isn't bundled (too heavy for a small team).
 
+**Q15: What about monitoring / observability after launch?**
+The team *declares* observability but doesn't *wire* it (same boundary as deploy). The PRD marks 1-2 success metrics `[instrument]`, the architect's SPEC "Observability" section turns those into concrete signals to emit (metric/event/log names), the dev emits them, and the production module's RUNBOOK "Alert Signals" reference those names. So the feature ships **instrumented** and the RUNBOOK is executable. Standing up dashboards, SLOs, and alerts on those signals is yours (full APM is out of scope).
+
 ---
 
 ## Version & evolution
 
-- **Guide version**: 1.8.0 — see [CHANGELOG](../CHANGELOG.md) for what changed
+- **Guide version**: 1.9.0 — see [CHANGELOG](../CHANGELOG.md) for what changed
 - **Target team size**: 5-10 people
 - **Estimated rollout time**: 1-2 days (including the first end-to-end run of the process)
 - **Scope boundary**: the team stops at approved, tested, merge-ready code — running CI/CD and the actual production deploy stay your responsibility.

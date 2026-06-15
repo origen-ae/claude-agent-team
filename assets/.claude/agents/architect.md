@@ -70,6 +70,7 @@ Following TEMPLATE-SPEC.md:
 10. **Performance/availability targets**
 11. **Risks and mitigations**
 12. **Security & abuse cases** — REQUIRED when the feature touches auth/authorization, money or balances, PII/sensitive data, file uploads, or untrusted external input. Do a lightweight STRIDE-style pass: for each realistic threat, name the mitigation and which test verifies it (this directs qa's negative tests and the reviewer's scrutiny). For a non-sensitive feature, state "Not security-sensitive: <why>" — don't omit the section.
+13. **Observability** — REQUIRED for production-facing features. Turn the PRD's `[instrument]` success metrics into concrete signals the feature must emit (metric/event/log names + where), and list the alert-worthy conditions that feed the RUNBOOK's "Alert Signals". The team emits the signals; wiring dashboards/alerts is the user's. For a non-production/internal feature, state "Not applicable: <why>".
 
 ## An ADR must contain
 
