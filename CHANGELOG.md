@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project uses [Semantic Versioning](https://semver.org/).
 
+## [1.2.0] - 2026-06-15
+
+### Added
+- **SPEC-000 living document**: architect must patch SPEC-000 (API inventory, data model, module descriptions) after every deployed PRD; rules enforced in architect agent and doc-conventions skill
+- **Backlog enforcement**: PM now writes a `BACKLOG-NNN` entry for every Non-goal before PRD approval; backlog table referenced inline in Non-goals text
+- **Cross-PRD supersession**: `supersedes` / `superseded-by` optional frontmatter fields; `superseded` stage with 🔁 emoji; architect marks impacted PRDs as superseded when a new PRD refactors them
+- **STATUS backlog summary**: `build_status.py` parses `docs/backlog.md` and renders open P0/P1 items in both STATUS.md and status.html; statuses: `open | in-progress | done | wontfix | superseded`
+- `assets/docs/backlog.md` column order aligned with parser: `ID | Title | Priority | Source | Status`
+
+### Changed
+- `assets/CLAUDE.md`: added superseded stage, supersedes/superseded-by fields, deployed → update-SPEC-000 rule
+- `assets/.claude/agents/architect.md`: cross-PRD impact analysis step + post-deployment SPEC-000 update section
+- `assets/.claude/agents/pm.md`: explicit Non-goals → Backlog step (step 6) in PRD workflow
+- `assets/docs/_templates/TEMPLATE-PRD.md`: Non-goals section now shows BACKLOG-NNN reference format
+- `assets/.claude/skills/doc-conventions/SKILL.md`: superseded stage documented, SPEC-000 living doc rules, cross-PRD supersession rules
+
 ## [1.1.0] - 2026-06-15
 
 ### Added

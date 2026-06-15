@@ -11,14 +11,14 @@ summary: Running list of deferred and planned work items (BACKLOG-NNN).
 
 Deferred and planned work, owned by pm. Each item has a stable `BACKLOG-NNN` id that PRD "Non-goals" can reference. This is a single running file — it is **not** stage-tracked and does not appear on the STATUS dashboard.
 
-| ID | Title | Source | Priority | Prerequisite | Status |
-|---|---|---|---|---|---|
-| BACKLOG-001 | _(example)_ Bulk CSV export for reports | PRD-001 §Non-goals | P2 | reporting API stable | open |
+| ID | Title | Priority | Source | Status |
+|---|---|---|---|---|
+| BACKLOG-001 | _(example)_ Bulk CSV export for reports | P2 | PRD-001 §Non-goals | open |
 
 ## Conventions
 
 - **id**: `BACKLOG-NNN`, never reused.
+- **Priority**: P0–P2.
 - **Source**: where it came from (e.g. `PRD-001 §Non-goals`, a user request, a retro).
-- **Priority**: P0–P3.
-- **Status**: `open` | `in-progress` | `done` | `superseded` (note which PRD/BACKLOG superseded it).
-- pm sweeps unimplemented P2/P3 items here after a PRD deploys, and updates statuses when a new PRD incidentally resolves an item.
+- **Status**: `open` | `in-progress` | `done` | `wontfix` | `superseded` (note which PRD superseded it).
+- pm sweeps unimplemented items here after a PRD deploys, and updates statuses when a new PRD incidentally resolves an item.

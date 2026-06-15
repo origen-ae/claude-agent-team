@@ -149,11 +149,11 @@ flowchart LR
 
 ## 7. Non-Goals
 
-Explicitly out of scope:
+Explicitly out of scope. Each deferred item **must** have a matching entry in `docs/backlog.md` and be referenced by its `BACKLOG-NNN` id:
 
-- No points gifting (existing functionality unchanged)
-- No points expiration (revisit in v2)
-- No stacking of points + coupons (v1 is points only)
+- No points gifting (existing functionality unchanged) — see [BACKLOG-001](../backlog.md)
+- No points expiration (revisit in v2) — see [BACKLOG-002](../backlog.md)
+- No stacking of points + coupons (v1 is points only) — see [BACKLOG-003](../backlog.md)
 
 ## 8. Risks and Dependencies
 

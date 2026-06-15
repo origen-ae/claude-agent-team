@@ -62,6 +62,7 @@ summary: One-sentence summary (< 100 characters)
 | `awaiting-deploy-approval` | Waiting for user to approve deployment | qa (when the re-test passes) |
 | `deployed` | Deployed | marked by pm after deployment |
 | `cancelled` | Cancelled | pm (when the user decides not to proceed) |
+| `superseded` | Replaced by a later PRD | architect (when a new PRD refactors this one) |
 
 **Key rule**: Once marked `awaiting-*-approval`, you must wait for the user's approval; agents may not advance on their own.
 
@@ -85,9 +86,33 @@ Use the ID (e.g. `PRD-008`), not natural language. The optional `related` field 
 related: [SPEC-008, ADR-005]
 ```
 
+## SPEC-000 Is a Living Document
+
+`docs/spec/SPEC-000-current-state.md` is **not** a one-time snapshot. The architect must update it after every PRD reaches `deployed`:
+
+- Append new API routes to the API inventory
+- Update the data model section for new tables or fields
+- Update module descriptions and the dependency diagram if responsibilities shifted
+
+Do not rewrite SPEC-000 from scratch — patch the relevant sections and update the `updated` field.
+
+## Cross-PRD Supersession
+
+When a new PRD refactors or replaces content from an earlier PRD:
+
+- Add `supersedes: [PRD-003]` to the new PRD's frontmatter (optional field)
+- Add `superseded-by: PRD-008` and change stage to `superseded` in the old PRD's frontmatter
+- The architect notes the impact in the new SPEC's "Links" section
+
+Optional frontmatter fields for cross-PRD tracking:
+```yaml
+supersedes: [PRD-003, PRD-005]   # this PRD replaces these
+superseded-by: PRD-012            # set when this PRD is replaced
+```
+
 ## Do Not
 
-- Do not delete documents (archive via cancelled)
+- Do not delete documents (archive via cancelled or superseded)
 - Do not reuse IDs
 - Do not write the same content in multiple documents
 - Do not write "TBD" (either leave it out, or state explicitly "pending decision by X, expected to be filled in by Y")

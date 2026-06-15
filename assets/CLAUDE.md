@@ -103,6 +103,8 @@ After an agent finishes its stage task, it **must**:
 2. Run `python scripts/build_status.py` to rebuild STATUS.md
 3. Notify the agent for the next stage via SendMessage (or pm, for approval)
 
+**Additional action at `deployed`**: the architect must update `docs/spec/SPEC-000-current-state.md` — append new APIs, data model changes, and module updates introduced by this PRD. SPEC-000 is the single source of truth for the overall system architecture and must stay current.
+
 ## Document System
 
 ### 7 Document Types
@@ -171,7 +173,11 @@ summary: One-line summary (< 100 chars)
 ---
 ```
 
-Optional: `related`, `tags`, `module`, `priority`, `cancelled-reason`.
+Optional: `related`, `tags`, `module`, `priority`, `cancelled-reason`, `supersedes`, `superseded-by`.
+
+Cross-PRD supersession fields:
+- `supersedes: [PRD-003, PRD-005]` — add to the **new** PRD that replaces earlier ones
+- `superseded-by: PRD-008` — add to the **old** PRD being replaced, together with `stage: superseded`
 
 ### stage Enum (8 stages + special)
 
@@ -189,6 +195,7 @@ Optional: `related`, `tags`, `module`, `priority`, `cancelled-reason`.
 | `awaiting-deploy-approval` | Awaiting user approval of deployment | user |
 | `deployed` | Deployed ✅ | - |
 | `cancelled` | Cancelled ❌ | - |
+| `superseded` | Replaced by a later PRD 🔁 | architect (set on old PRD when new PRD refactors it) |
 
 ### Must-do Before Writing a Document
 

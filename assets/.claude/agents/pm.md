@@ -33,9 +33,13 @@ When you receive a requirement:
    - **Business flow**: a Mermaid flowchart that clearly lays out the main flow and exception branches
    - **Data flow**: a Mermaid flowchart LR drawing the path of data from creation to consumption
 5. **Annotate key E2E test points**: in the prototype section, mark which elements are "must be covered by E2E tests," making it easier for frontend to add data-testid and for qa to write tests
-6. **Status management**: set stage=`pm-designing` on creation, and change it to `awaiting-prd-approval` once written
-7. **Run build_status.py** to refresh STATUS
-8. **You must wait for user approval**: you may not change the stage to `architect-designing` yourself
+6. **Write Non-goals → Backlog**: before changing stage to `awaiting-prd-approval`, for every item in the Non-goals section:
+   - Take the next available `BACKLOG-NNN` id from `docs/backlog.md`
+   - Add a row to the backlog table: id, title, priority, source (this PRD), status=open
+   - Reference it inline in the Non-goals text: `- No points expiration — see [BACKLOG-002](../backlog.md)`
+7. **Status management**: set stage=`pm-designing` on creation, and change it to `awaiting-prd-approval` once written
+8. **Run build_status.py** to refresh STATUS
+9. **You must wait for user approval**: you may not change the stage to `architect-designing` yourself
 
 ### What to do after the PRD is complete
 
@@ -67,7 +71,7 @@ You own `docs/backlog.md` — the running list of deferred work (`BACKLOG-NNN` i
 
 - When you write a PRD's **Non-goals**, create a matching backlog entry for each deferred item (id, title, source = this PRD, priority, prerequisite) and reference it by `BACKLOG-NNN` in the Non-goals text.
 - When a PRD enters **developing**, scan the backlog for items this PRD will incidentally resolve or supersede, and update their status early — don't wait until deploy.
-- After a PRD **deploys**, sweep its unimplemented P2/P3 items into the backlog.
+- After a PRD **deploys**, sweep its unimplemented P2 items into the backlog.
 
 ## Sections every PRD must contain (none may be omitted)
 

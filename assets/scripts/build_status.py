@@ -36,9 +36,36 @@ STAGES = [
     ("awaiting-deploy-approval", "🟡", "Awaiting deploy approval"),
     ("deployed", "✅", "Deployed"),
     ("cancelled", "❌", "Cancelled"),
+    ("superseded", "🔁", "Superseded"),
 ]
 STAGE_LABEL = {k: (icon, label) for k, icon, label in STAGES}
 STAGE_ORDER = {k: i for i, (k, _, _) in enumerate(STAGES)}
+
+
+def load_backlog():
+    """Parse docs/backlog.md and return list of backlog items."""
+    backlog_path = DOCS_ROOT / "backlog.md"
+    if not backlog_path.exists():
+        return []
+    items = []
+    import re
+    pattern = re.compile(
+        r"\|\s*(BACKLOG-\d+)\s*\|\s*([^|]+?)\s*\|\s*(P[012])\s*\|\s*([^|]*?)\s*\|\s*(open|in-progress|done|wontfix|superseded|resolved)\s*\|",
+        re.IGNORECASE,
+    )
+    try:
+        text = backlog_path.read_text(encoding="utf-8")
+        for m in pattern.finditer(text):
+            items.append({
+                "id": m.group(1),
+                "title": m.group(2).strip(),
+                "priority": m.group(3).upper(),
+                "source": m.group(4).strip(),
+                "status": m.group(5).lower(),
+            })
+    except Exception as e:
+        print(f"⚠️  Could not parse backlog.md: {e}", file=sys.stderr)
+    return items
 
 
 def load_all_docs():
@@ -259,17 +286,35 @@ def render_markdown(groups):
             lines.append(f"| PRD-{rid} | {prd.get('title', '')} | {prd.get('updated', '')} |")
         lines.append("")
 
-    # Cancelled
-    cancelled = [
+    # Cancelled / Superseded
+    closed = [
         (rid, g) for rid, g in groups.items()
-        if get_canonical_stage(g) == "cancelled"
+        if get_canonical_stage(g) in ("cancelled", "superseded")
     ]
-    if cancelled:
-        lines.append("## ❌ Cancelled\n")
-        for rid, g in cancelled:
+    if closed:
+        lines.append("## ❌ Cancelled / 🔁 Superseded\n")
+        for rid, g in closed:
             prd = g.get("prd", {})
-            lines.append(f"- PRD-{rid}: {prd.get('title', '')}")
+            stage = get_canonical_stage(g)
+            icon = "❌" if stage == "cancelled" else "🔁"
+            lines.append(f"- {icon} PRD-{rid}: {prd.get('title', '')}")
         lines.append("")
+
+    # Backlog summary
+    backlog = load_backlog()
+    open_items = [b for b in backlog if b["status"] == "open"]
+    if open_items:
+        lines.append("## 📥 Backlog\n")
+        p0 = [b for b in open_items if b["priority"] == "P0"]
+        p1 = [b for b in open_items if b["priority"] == "P1"]
+        p2 = [b for b in open_items if b["priority"] == "P2"]
+        lines.append(f"**Open**: {len(open_items)} items — P0: {len(p0)}  P1: {len(p1)}  P2: {len(p2)}\n")
+        if p0 or p1:
+            lines.append("| ID | Title | Priority | Source |")
+            lines.append("|---|---|---|---|")
+            for b in p0 + p1:
+                lines.append(f"| {b['id']} | {b['title']} | {b['priority']} | {b['source']} |")
+            lines.append("")
 
     return "\n".join(lines)
 
@@ -417,6 +462,24 @@ def render_html(groups):
         html += '</div></div>'
 
     html += '</div>'
+
+    # Backlog summary
+    backlog = load_backlog()
+    open_items = [b for b in backlog if b["status"] == "open"]
+    if open_items:
+        p0 = [b for b in open_items if b["priority"] == "P0"]
+        p1 = [b for b in open_items if b["priority"] == "P1"]
+        p2 = [b for b in open_items if b["priority"] == "P2"]
+        html += '<div class="section"><h2>📥 Backlog</h2>'
+        html += f'<p style="color:#718093">{len(open_items)} open — <strong>P0: {len(p0)}</strong> &nbsp; P1: {len(p1)} &nbsp; P2: {len(p2)}</p>'
+        if p0 or p1:
+            html += '<table><tr><th>ID</th><th>Title</th><th>Priority</th><th>Source</th></tr>'
+            for b in p0 + p1:
+                color = "#e74c3c" if b["priority"] == "P0" else "#f39c12"
+                html += f'<tr><td><strong>{b["id"]}</strong></td><td>{b["title"]}</td><td style="color:{color};font-weight:bold">{b["priority"]}</td><td>{b["source"]}</td></tr>'
+            html += '</table>'
+        html += '</div>'
+
     html += '</body></html>'
     return html
 
