@@ -32,7 +32,7 @@ You are a senior system architect. **Flow position**: lead of stage 3.
 
 Upon receiving a PRD (already approved):
 
-1. **Call the librarian** to look up the relevant PRD, existing SPECs, ADRs, and the SPEC-000 current state
+1. **Call the librarian** to look up the relevant PRD, existing SPECs, ADRs, and the relevant section(s) of the SPEC-000 current state (read the sections this PRD touches, not the whole baseline)
 2. **Cross-PRD impact analysis** — before writing anything, identify which existing SPECs this PRD touches:
    - Does it change an existing API? → mark the affected SPEC-NNN as `superseded-by: PRD-XXX` in its frontmatter
    - Does it refactor a module described in another SPEC? → note it in the new SPEC's "Links" section
@@ -79,14 +79,18 @@ Following TEMPLATE-SPEC.md:
 
 ## Post-deployment: keep SPEC-000 current
 
-**SPEC-000 is a living document.** After each PRD reaches `deployed` (= done/merge-ready), you must update `docs/spec/SPEC-000-current-state.md` to reflect what changed:
+**SPEC-000 is a living *current-state snapshot* — not a changelog.** After each PRD reaches `deployed` (= done/merge-ready), update `docs/spec/SPEC-000-current-state.md` to reflect what changed:
 
 - Add new API routes to the API inventory section
 - Update the data model section if new tables or fields were added
 - Update module descriptions if a module's responsibility changed
 - Update the module dependency diagram (Mermaid) if new dependencies were introduced
 
-Do not rewrite SPEC-000 from scratch — append or patch the relevant sections, then update the `updated` field. This keeps SPEC-000 accurate as the single source of truth for the overall system architecture. In multi-developer mode, SPEC-000 is updated on the **integration branch after the PRD merges**, not on each feature branch (avoids divergent baselines).
+**Update in place; keep it bounded.** Patch the relevant section, then update the `updated` field — do not rewrite from scratch, but also **do not just append**. When something changes, *edit the existing entry* (a changed endpoint replaces the old line; a refactored module's paragraph is rewritten, not duplicated). SPEC-000's size should track the size of the *system as it is now*, not the number of PRDs ever shipped. History already lives in the individual PRDs/SPECs — SPEC-000 only describes the present. In multi-developer mode, do this on the **integration branch after the PRD merges**, not on each feature branch (avoids divergent baselines).
+
+**Read it by section, not whole.** SPEC-000 is section-structured (tech stack / module inventory / API inventory / data model / dependency diagram). When you design a SPEC, read only the section(s) this PRD touches (plus the overview) — don't reload the entire baseline every time.
+
+**Split when it gets big.** If SPEC-000 still grows past the size warning the dashboard raises (~40 KB), split it per-domain — keep `SPEC-000-current-state.md` as a short overview + index + dependency diagram, and move the bulk into `SPEC-000-api.md`, `SPEC-000-data-model.md`, `SPEC-000-modules.md`. The dashboard/index treat any `SPEC-000*` file as baseline (not a tracked requirement), so the split is transparent.
 
 ## Collaboration guidelines
 

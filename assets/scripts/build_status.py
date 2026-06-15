@@ -14,6 +14,11 @@ from collections import defaultdict
 # state) is flagged as stalled on the board.
 STALE_DAYS = 5
 
+# When the SPEC-000 baseline (all SPEC-000* files combined) grows past this,
+# warn the architect to compact it (it's a current-state snapshot, not a
+# changelog) or split it per-domain before it strains the context window.
+SPEC000_WARN_BYTES = 40_000
+
 # Make emoji/UTF-8 output safe on consoles with a non-UTF-8 default encoding
 # (e.g. Windows GBK). No-op if reconfigure is unavailable or fails.
 try:
@@ -119,8 +124,9 @@ def group_by_requirement(docs):
         req_id = extract_req_id(doc["id"])
         if not req_id:
             continue
-        # Skip SPEC-000 (project baseline of the current state)
-        if doc["id"] == "SPEC-000":
+        # Skip SPEC-000 and any per-domain split of it (SPEC-000-api, etc.) —
+        # these are the project baseline, not a tracked requirement.
+        if str(doc["id"]).startswith("SPEC-000"):
             continue
         if doc["type"] == "prd":
             groups[req_id]["prd"] = doc
@@ -232,6 +238,24 @@ def compute_state_warnings(groups):
             days = _days_since(prd.get("updated"))
             if days is not None and days >= STALE_DAYS:
                 warnings.append(("warn", f"PRD-{rid}: stalled {days} days in '{stage}' (no update since {prd.get('updated')})"))
+
+    # SPEC-000 baseline size — prompt compaction/split before it strains context.
+    spec_dir = DOCS_ROOT / "spec"
+    if spec_dir.exists():
+        files = list(spec_dir.glob("SPEC-000*.md"))
+        total = 0
+        for f in files:
+            try:
+                total += f.stat().st_size
+            except Exception:
+                pass
+        if total > SPEC000_WARN_BYTES:
+            warnings.append((
+                "warn",
+                f"SPEC-000 baseline is large ({total // 1024} KB across {len(files)} file(s)) — "
+                f"compact it (it's a current-state snapshot, not a changelog) or split per-domain "
+                f"(SPEC-000-api / SPEC-000-data-model / SPEC-000-modules)",
+            ))
 
     return warnings
 

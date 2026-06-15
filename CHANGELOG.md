@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project uses [Semantic Versioning](https://semver.org/).
 
+## [1.5.0] - 2026-06-15
+
+### Changed
+- **SPEC-000 is a bounded current-state snapshot, not a changelog** (P1-4 audit follow-up / P1-9): the architect now updates entries **in place** (a changed endpoint replaces the old line; a refactored module's paragraph is rewritten) instead of only appending, so SPEC-000's size tracks the *current system* rather than the number of PRDs ever shipped. History stays in the individual PRDs/SPECs.
+- The architect reads SPEC-000 **by section** (only the parts a PRD touches) rather than reloading the whole baseline on every design — bounds per-invocation context cost.
+
+### Added
+- **SPEC-000 size warning**: `build_status.py` / `check_state.py` warn when the combined `SPEC-000*` baseline exceeds ~40 KB, prompting compaction or a per-domain split.
+- **Per-domain split convention**: when SPEC-000 grows too large, split into `SPEC-000-api.md` / `SPEC-000-data-model.md` / `SPEC-000-modules.md` with the main file as a short overview + index. The dashboard/index treat any `SPEC-000*` file as baseline (not a tracked requirement), so the split is transparent.
+- "Context limit" documented as a scaling trigger independent of document count (CLAUDE.md, document-system.md).
+
 ## [1.4.0] - 2026-06-15
 
 ### Added

@@ -88,13 +88,13 @@ related: [SPEC-008, ADR-005]
 
 ## SPEC-000 Is a Living Document
 
-`docs/spec/SPEC-000-current-state.md` is **not** a one-time snapshot. The architect must update it after every PRD reaches `deployed`:
+`docs/spec/SPEC-000-current-state.md` is a **living current-state snapshot** — it describes the system as it is *now*, not its history. The architect keeps it current after every PRD reaches `deployed`:
 
-- Append new API routes to the API inventory
+- Add new API routes to the API inventory
 - Update the data model section for new tables or fields
 - Update module descriptions and the dependency diagram if responsibilities shifted
 
-Do not rewrite SPEC-000 from scratch — patch the relevant sections and update the `updated` field.
+**Update in place; keep it bounded.** Patch the relevant section and update `updated` — but edit existing entries rather than only appending, so the file's size tracks the *current system*, not the number of PRDs ever shipped (history already lives in the individual PRDs/SPECs). Read it **by section** when designing a SPEC — only the sections a PRD touches, not the whole baseline. If it still grows past ~40 KB (the dashboard warns), split it per-domain: keep `SPEC-000-current-state.md` as a short overview + index, move detail into `SPEC-000-api.md` / `SPEC-000-data-model.md` / `SPEC-000-modules.md`. Any `SPEC-000*` file is treated as baseline, not a tracked requirement.
 
 ## Cross-PRD Supersession
 

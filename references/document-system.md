@@ -111,6 +111,8 @@ The current default is "Stage A" (flat layout). It evolves naturally with docume
 | 50-100 | Subdirectories by module | Too many files in a single directory | Configure the module field |
 | 100+ | Upgrade to the full system | Continuous growth | See the v1.1 advanced guide |
 
+A separate trigger, independent of document *count*, is **SPEC-000 size**: every architect run reads the baseline, so one oversized SPEC-000 strains context even in a small project. When the dashboard warns it is large (~40 KB), the architect compacts it (current-state snapshot, not a changelog — edit entries in place rather than appending) or splits it per-domain (`SPEC-000-api` / `SPEC-000-data-model` / `SPEC-000-modules`).
+
 ## The doc-conventions Skill
 
 The authoritative doc-conventions skill lives at `assets/.claude/skills/doc-conventions/SKILL.md` (installed to `.claude/skills/doc-conventions/SKILL.md`). Its content is **not duplicated here** — see that file for the frontmatter format, the full stage enum, the ID-pairing rule, the SPEC-000 living-document rules, and cross-PRD supersession.

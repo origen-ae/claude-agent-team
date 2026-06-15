@@ -1,6 +1,6 @@
 # Project Collaboration Conventions
 
-<!-- claude-agent-team: v1.4.0 — do not remove; upgrades use this to detect the installed version -->
+<!-- claude-agent-team: v1.5.0 — do not remove; upgrades use this to detect the installed version -->
 
 ## Project Status (filled in by the architect after first launch)
 
@@ -264,6 +264,8 @@ The current default is "Phase A" (flat). It evolves naturally afterward based on
 | 20-50 | + tags + related | librarian retrieval is inaccurate | Populate extended fields |
 | 50-100 | Split into subdirectories by module | A single directory has too many files | Configure the module field |
 | 100+ | Upgrade to the full system | Continued growth | See the v1.1 advanced guide |
+
+A separate trigger, independent of doc *count*, is **SPEC-000 size**: because every architect run reads it, a single oversized baseline strains the context window even with few documents. When the dashboard warns SPEC-000 is large (~40 KB), the architect compacts it (it's a current-state snapshot, not a changelog) or splits it per-domain (`SPEC-000-api` / `SPEC-000-data-model` / `SPEC-000-modules`).
 
 ## Tool Permissions
 
