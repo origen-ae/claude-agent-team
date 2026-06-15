@@ -1,6 +1,6 @@
 # Project Collaboration Conventions
 
-<!-- claude-agent-team: v1.9.0 — do not remove; upgrades use this to detect the installed version -->
+<!-- claude-agent-team: v1.10.0 — do not remove; upgrades use this to detect the installed version -->
 
 ## Project Status (filled in by the architect after first launch)
 
@@ -372,6 +372,23 @@ PR review can serve as the **ship** gate (merging = ship approval). But the PRD 
 - Finding documents → use librarian, do not grep yourself
 - Running tests / extensive searches → spawn a subagent
 - Context exceeds 70% → `/compact`
+
+## Cost & Context Budget
+
+A full **L**-tier run spawns several agents that each cold-read the PRD + SPEC, so cost scales with ceremony. Keep it proportional and don't let a feature silently burn tokens.
+
+**Right-size by tier** (this is the main lever): **S** stays a single dev + reviewer; **M** adds a short note + smoke test; only **L** pays for the full PRD → SPEC → dev×2 → reviewer×2 → qa chain. Misclassifying up is cheap; over-running an **S** as an **L** is the common waste.
+
+**Model assignment (and why):**
+- `architect` = **opus** — kept deliberately. Architecture is the highest-leverage artifact (one bad SPEC misdirects every downstream agent), so it's worth the strongest model. *Tunable*: if cost matters and a SPEC is routine CRUD with no novel design, you may run it on sonnet — but the default is opus, and opus is clearly worth it for novel architecture, cross-subsystem data-consistency, or ADR-level trade-offs.
+- `pm / frontend / backend / qa / reviewer` = **sonnet**; `librarian` = **haiku** (retrieval only).
+
+**Spend less context, not less rigor:**
+- Read **by section / by summary**: ask the librarian for the relevant sections (it returns summaries + paths, never whole docs); read only the SPEC-000 sections a PRD touches (see SPEC-000 rules).
+- On handoff, point the next agent at the **specific sections/anchors** it needs rather than "go re-read everything".
+- The PRD + SPEC are stable and re-read by dev, qa, and reviewer within one feature — **prompt caching** makes those repeated reads cheap; rely on it rather than trimming the documents.
+
+**Stop rule (don't loop forever):** if a single requirement exceeds **~12 agent invocations** or a gate/fix loop repeats **3+ times** without converging, **stop and escalate to the user** with a short summary of what's stuck — a human decision is cheaper than another speculative round.
 
 ## Common Commands
 

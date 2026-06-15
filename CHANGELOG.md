@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project uses [Semantic Versioning](https://semver.org/).
 
+## [1.10.0] - 2026-06-16
+
+### Added
+- **"Cost & Context Budget" guidance** in CLAUDE.md (P1-18). Documents how cost scales with tier ceremony, the rationale for keeping `architect` on **opus** (highest-leverage artifact — **not** downgraded; tunable to sonnet only for routine CRUD SPECs), context-thrift practices (section/summary reads, anchor-based handoffs, reliance on prompt caching for the repeated PRD/SPEC reads within a feature), and a **stop rule** — escalate to the user if a requirement exceeds ~12 agent invocations or a fix/gate loop repeats 3+ times without converging.
+
+### Note
+- The audit's suggestion to default `architect` to sonnet was **declined** — architecture is the highest-leverage step; opus stays the default. The cost concern is addressed via tier right-sizing, context thrift, and the stop rule instead.
+
 ## [1.9.0] - 2026-06-16
 
 ### Added
