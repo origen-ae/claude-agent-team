@@ -35,7 +35,14 @@ This skill fixes all four: a serial flow, mandatory approval gates, a centralize
 
 ## Quick start
 
-1. Clone the skill into your skills directory:
+1. Install the skill — pick one method:
+
+   **Via Claude Code plugin system (recommended):**
+   ```
+   /plugin install https://github.com/origen-ae/claude-agent-team
+   ```
+
+   **Or via git clone:**
    ```bash
    # Global — available in all projects:
    git clone https://github.com/origen-ae/claude-agent-team.git ~/.claude/skills/claude-agent-team
@@ -139,6 +146,10 @@ Claude Code (agent teams), Python 3 (dashboard scripts), a POSIX shell for the h
 To get the latest skill version:
 
 ```bash
+# If installed via plugin system:
+/plugin update claude-agent-team
+
+# If installed via git clone:
 cd ~/.claude/skills/claude-agent-team && git pull   # adjust path if project-local
 ```
 
