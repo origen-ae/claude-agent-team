@@ -2,7 +2,7 @@
 
 # 🤖 Claude Agent Team
 
-> A ready-to-run agent team for Claude Code — PM, architect, frontend, backend & QA working through an 8-stage serial workflow with human approval gates, a shared document system (PRD/SPEC/TEST-PLAN/ADR/RUNBOOK), and an auto-generated progress dashboard.
+> A ready-to-run agent team for Claude Code — PM, architect, frontend, backend & QA working through an 8-stage serial workflow with human approval gates, a shared document system (PRD/SPEC/TEST-PLAN/ADR/RUNBOOK/BACKLOG), and an auto-generated progress dashboard.
 
 [![GitHub stars](https://img.shields.io/github/stars/origen-ae/claude-agent-team?style=social)](https://github.com/origen-ae/claude-agent-team/stargazers)
 [![validate](https://github.com/origen-ae/claude-agent-team/actions/workflows/validate.yml/badge.svg)](https://github.com/origen-ae/claude-agent-team/actions/workflows/validate.yml)
@@ -12,7 +12,7 @@
 
 **One assistant can write code. A *team* can ship it — with design, review, tests, and your sign-off at every gate.** ⭐ Star this if it's useful.
 
-`7 agents` · `8 stages` · `3 human approval gates` · `5 doc types` · `0 external dependencies`
+`7 agents` · `8 stages` · `3 human approval gates` · `6 doc types` · `0 external dependencies`
 
 **Who it's for:** solo developers orchestrating AI coding, small teams that want a repeatable AI dev process, and anyone who needs an auditable trail from requirement to design to tests to ship.
 
@@ -102,6 +102,7 @@ The same ID threads through all three, and the test plan even records a real rou
 | Human approval gates | ❌ | ❌ | ✅ PRD · SPEC · deploy |
 | Centralized progress board | ❌ | ❌ | ✅ auto-generated |
 | ID-paired docs (PRD→SPEC→tests) | ❌ | ❌ | ✅ |
+| Right-sized flow (S/M/L tiers) | ❌ | ❌ | ✅ small changes skip the ceremony |
 | Built-in E2E test layer | ❌ | ⚠️ | ✅ Playwright |
 
 ## Browse the agents

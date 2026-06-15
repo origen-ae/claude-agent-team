@@ -29,7 +29,7 @@ Three human approval gates: PRD approval, technical-solution approval, and pre-d
 ### Core Configuration
 
 - **7 agents**: pm / architect / frontend / backend / qa + reviewer / librarian
-- **6 document types**: PRD / SPEC / ADR / TEST-PLAN / RUNBOOK + STATUS
+- **7 document types**: PRD / SPEC / TEST-PLAN / ADR / RUNBOOK / BACKLOG + STATUS
 - **3 scripts**: build_index.py, build_status.py, parse_playwright_report.py
 - **Playwright E2E**: UI test automation
 - **0 external dependencies**: no database, no Lark, no vector store
@@ -40,6 +40,22 @@ Three human approval gates: PRD approval, technical-solution approval, and pre-d
 - **STATUS auto-generation**: agents only update the `stage` field in each document's frontmatter; the script scans them and generates STATUS.md and status.html.
 - **PM is the central hub**: all progress rolls up to the PM, who maintains the global view for you.
 - **Two test rounds**: round 1 plus a re-test, each recorded in the TEST-PLAN document.
+
+## Change-size Tiers (pick the flow that fits)
+
+Not every change runs the full 8 stages. Classify the work first:
+
+| Tier | Typical change | Flow | Docs |
+|---|---|---|---|
+| **S — small** | bug fix, copy/style tweak, single-file logic change, config | dev edits directly → run existing tests → reviewer → done | none |
+| **M — medium** | single feature extension, backend change with no API-contract change, one new interaction | pm writes a short note → dev implements → qa smoke test | optional light PRD (no SPEC) |
+| **L — large** | new page/module, cross-layer or API change, DB schema change, affects multiple agents | the full 8-stage flow below, all 3 gates active | full PRD + SPEC + TEST-PLAN |
+
+The agent classifies the tier first; **S never needs pm or architect**. The 8-stage flow below applies in full to **L**; **M** uses a trimmed version; **S** skips it. (S-tier still requires the existing test suite to pass, plus a unit test when core logic changes.)
+
+## New Features Go Through pm (not generic brainstorming)
+
+When the user starts a new feature, the orchestrator dispatches the **pm** agent first — not a generic brainstorming/planning skill, whose terminal state would bypass the PRD → SPEC → approval flow. pm owns requirement shaping (with its own lightweight brainstorming for L-tier work) and ends by writing a PRD. This follows the precedence rule **user instructions > skill triggers**.
 
 ## Development Flow (strictly serial, 8 stages)
 
@@ -68,6 +84,15 @@ Three human approval gates: PRD approval, technical-solution approval, and pre-d
 - **🛑 Stage 7 → 8**: user approves deployment (is it ready to go live?)
 
 At these gates, the agent stops and waits; it never advances on its own.
+
+### Approval Gates Are Loops, Not One-Way Doors
+
+A gate is a loop, not a one-way door. When you give feedback, the orchestrator (main Claude) routes it **back to the same agent** that produced the artifact; that agent revises and re-submits, repeating until you explicitly approve. The orchestrator must not absorb the feedback itself, skip ahead, or reassign the work to another agent.
+
+```
+Agent artifact → 🛑 review → "approved" → next stage
+                          └→ "change X" → back to the SAME agent → revise → re-submit (loop)
+```
 
 ### Cross-Agent Collaboration Rules
 
@@ -111,6 +136,16 @@ stage: pending | pm-designing | awaiting-prd-approval | architect-designing | aw
 | `cancelled` | Cancelled | pm (when the user decides not to proceed) |
 
 **Key rule**: once a document is marked `awaiting-*-approval`, it must wait for user approval; the agent cannot advance on its own.
+
+## Multi-Developer Mode (optional)
+
+For teams, run one feature branch per person; the branch name is the owner identity.
+
+- Develop on `feature/<name>`; open a PR into the integration branch (e.g. `develop`).
+- **PR review doubles as the approval gates**: the PRD in the PR description is approved on the PR, likewise the SPEC, and merging is the deploy approval.
+- PRD frontmatter records `owner: feature/<name>`.
+- Rebuild `STATUS.md` only on the shared branch; feature branches don't commit it.
+- For a large feature, claim the PRD number on the shared branch first (a reserved entry in `docs/index.yaml`), then write the PRD on your feature branch.
 
 ## What the Scaffold Sets Up / First Run
 

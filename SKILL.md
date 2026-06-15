@@ -1,6 +1,6 @@
 ---
 name: claude-agent-team
-description: Use when setting up a multi-agent team workflow in Claude Code — scaffolds 7 agents (PM, architect, frontend, backend, QA, reviewer, librarian), an 8-stage serial flow with human approval gates, a document system (PRD/SPEC/TEST-PLAN/ADR/RUNBOOK), and an auto-generated STATUS dashboard. Triggers on requests like "set up an agent team", "multi-agent dev workflow", or "agent team for my project".
+description: Use when setting up a multi-agent team workflow in Claude Code — scaffolds 7 agents (PM, architect, frontend, backend, QA, reviewer, librarian), an 8-stage serial flow with human approval gates and change-size tiers (S/M/L), a document system (PRD/SPEC/TEST-PLAN/ADR/RUNBOOK/BACKLOG), and an auto-generated STATUS dashboard. Triggers on requests like "set up an agent team", "multi-agent dev workflow", or "agent team for my project".
 ---
 
 # Claude Agent Team
@@ -15,7 +15,8 @@ Use when the user wants to set up a structured, multi-agent development team in 
 
 - **7 agents** in `.claude/agents/`: `pm`, `architect`, `frontend`, `backend`, `qa`, `reviewer`, `librarian`
 - **8-stage serial flow** with 3 human approval gates (PRD, SPEC, deploy)
-- **Document system** in `docs/`: PRD / SPEC / TEST-PLAN / ADR / RUNBOOK, with ID pairing (PRD-008 → SPEC-008 → TEST-PLAN-008)
+- **Change-size tiers (S/M/L)** — small changes skip the full flow; only large ones run all 8 stages
+- **Document system** in `docs/`: PRD / SPEC / TEST-PLAN / ADR / RUNBOOK + a pm-owned BACKLOG, with ID pairing (PRD-008 → SPEC-008 → TEST-PLAN-008)
 - **Auto-generated dashboard**: `STATUS.md` + `status.html` built by `scripts/build_status.py`, refreshed by a PostToolUse hook
 - **2 bundled skills**: `doc-conventions`, `playwright-testing`
 - **Playwright E2E** config + conventions
