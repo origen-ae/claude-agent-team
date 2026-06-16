@@ -13,6 +13,7 @@ export default defineConfig({
   ],
 
   use: {
+    // Set BASE_URL (or edit this default) to your app's dev URL.
     baseURL: process.env.BASE_URL || 'http://localhost:3000',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
@@ -26,10 +27,14 @@ export default defineConfig({
     },
   ],
 
-  webServer: {
-    command: 'npm run dev',
-    url: 'http://localhost:3000',
-    reuseExistingServer: !process.env.CI,
-    timeout: 120000,
-  },
+  // The architect fills this in during bootstrap from the project's real start
+  // command and port (these defaults assume a Node app on :3000). For a
+  // non-web / non-Node project, or if you start the server yourself, delete or
+  // leave this commented out — E2E will just use BASE_URL as-is.
+  // webServer: {
+  //   command: process.env.DEV_CMD || 'npm run dev',
+  //   url: process.env.BASE_URL || 'http://localhost:3000',
+  //   reuseExistingServer: !process.env.CI,
+  //   timeout: 120000,
+  // },
 });

@@ -1,6 +1,6 @@
 # Project Collaboration Conventions
 
-<!-- claude-agent-team: v1.10.0 — do not remove; upgrades use this to detect the installed version -->
+<!-- claude-agent-team: v1.11.0 — do not remove; upgrades use this to detect the installed version -->
 
 ## Project Status (filled in by the architect after first launch)
 

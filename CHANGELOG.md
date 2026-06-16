@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project uses [Semantic Versioning](https://semver.org/).
 
+## [1.11.0] - 2026-06-16
+
+### Fixed
+- **Cancelled/superseded progress bar** (P2-9): these stages sit past `deployed` in the order, so the progress bar rendered them 100% green. They now show no completed milestones (the status label already says cancelled/superseded).
+- **HTML escaping** (P2-3): the remaining `status.html` interpolations (backlog id/title/source) are now escaped; removed the unused `jinja2` dependency from `requirements.txt` (the scripts use f-strings; `import yaml` was already dropped from build_status).
+
+### Added
+- **Archive directory** (P2-8): `docs/_archive/` is skipped by `build_index.py` / `build_status.py` (like `_templates/`) and searched by the librarian only on request — a place to move long-dead docs out of active scans and the growth thresholds without deleting them.
+- **Windows CI leg** (P2-5): `validate.yml` now runs on `windows-latest` as well as Ubuntu (job shell pinned to bash so the harness is identical; scripts execute as native Windows Python) — proving the cross-platform claim.
+
+### Changed
+- **playwright.config.ts** (P2-4): the hardcoded `webServer` (`npm run dev` / `:3000`) is commented out with guidance; the architect fills it from the project's real start command/port at bootstrap, or it stays off for non-web projects. `baseURL` is overridable via `BASE_URL`.
+- **librarian** (P2-2): on sparse/weak matches it must say so explicitly ("not authoritative") rather than implying a clean miss — a false "no duplicate PRD found" is high-stakes.
+- **document-system.md** (P2-10): documents that ADR/RUNBOOK `stage` is informational (never on the board) and the `docs/_archive/` convention.
+
 ## [1.10.0] - 2026-06-16
 
 ### Added

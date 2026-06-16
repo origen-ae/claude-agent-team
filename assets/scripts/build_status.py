@@ -83,7 +83,7 @@ def load_all_docs():
     for md_file in DOCS_ROOT.rglob("*.md"):
         if md_file.name in ("README.md", "index.yaml", "backlog.md"):
             continue
-        if "_templates" in md_file.parts:
+        if "_templates" in md_file.parts or "_archive" in md_file.parts:
             continue
         try:
             post = frontmatter.load(md_file)
@@ -158,6 +158,12 @@ def get_stage_progress(group):
     """
     prd_stage = get_canonical_stage(group)
     current_idx = STAGE_ORDER.get(prd_stage, -1)
+    # Cancelled / superseded sit past `deployed` in the stage order, which would
+    # otherwise mark every milestone ✅ (a misleading "100% done" bar). They did
+    # not complete the flow, so show no completed milestones — the section
+    # heading and status label already say cancelled/superseded.
+    if prd_stage in ("cancelled", "superseded"):
+        current_idx = -1
 
     # milestone -> the artifact that must exist for it to count as truly done.
     # None means we have no independent signal (code isn't tracked here), so we
@@ -592,7 +598,7 @@ def render_html(groups):
             html += '<table><tr><th>ID</th><th>Title</th><th>Priority</th><th>Source</th></tr>'
             for b in p0 + p1:
                 color = "#e74c3c" if b["priority"] == "P0" else "#f39c12"
-                html += f'<tr><td><strong>{b["id"]}</strong></td><td>{b["title"]}</td><td style="color:{color};font-weight:bold">{b["priority"]}</td><td>{b["source"]}</td></tr>'
+                html += f'<tr><td><strong>{html_escape(b["id"])}</strong></td><td>{html_escape(b["title"])}</td><td style="color:{color};font-weight:bold">{b["priority"]}</td><td>{html_escape(b["source"])}</td></tr>'
             html += '</table>'
         html += '</div>'
 

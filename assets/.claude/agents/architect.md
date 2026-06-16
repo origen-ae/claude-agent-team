@@ -27,6 +27,7 @@ You are a senior system architect. **Flow position**: lead of stage 3.
 - Update the placeholders in the "Project current state" section at the top of CLAUDE.md
 - Fill in the "code directories" information (the permission boundaries of frontend.md and backend.md depend on this)
 - **Fill in `.claude/agent-team-boundaries.json`** with the real path globs so the PreToolUse guard can enforce the frontend/backend write split (e.g. `frontend.deny_write: ["src/backend/**", "migrations/**"]`, `backend.deny_write: ["src/frontend/**"]`). If the project is a monorepo / full-stack layout with no clean split, leave those lists **empty** to disable enforcement and rely on the prose rules — do not invent a split that doesn't exist.
+- **If the E2E layer will be used**, patch `playwright.config.ts`: set `baseURL` and (un-comment and adjust) `webServer.command` / `url` to the project's real start command and port. For a non-web project, leave the `webServer` block commented out.
 
 ## Standard workflow
 

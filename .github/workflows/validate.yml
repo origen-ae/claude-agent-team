@@ -7,7 +7,19 @@ on:
 
 jobs:
   validate:
-    runs-on: ubuntu-latest
+    # Run on Windows too — the hook/scripts target Windows as a first-class
+    # platform, so prove they work there (no POSIX-shell assumptions).
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    # Use bash on every OS (Git Bash ships on the Windows runner) so the
+    # heredoc python steps run identically; the scripts still execute as native
+    # Windows Python, which is what we're validating.
+    defaults:
+      run:
+        shell: bash
     steps:
       - uses: actions/checkout@v4
 

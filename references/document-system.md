@@ -97,8 +97,9 @@ Optional: `related`, `tags`, `module`, `priority`, `cancelled-reason`, `supersed
 
 - Modifying the body text requires updating the `updated` field
 - Major changes to documents in the approved/active stage must go through a process similar to creating a new one
-- Do not delete documents; archive via the `cancelled` status
+- Do not delete documents; archive via the `cancelled` / `superseded` status. To get long-dead docs out of active scans (and the 20/50/100 growth thresholds) without deleting them, move the files into `docs/_archive/` — the index and dashboard skip that directory (like `_templates/`), and the librarian searches it only when asked for history
 - IDs are never reused
+- **ADR / RUNBOOK `stage`**: these are independently numbered and are **not** requirement-tracked, so they never appear on the STATUS board. Their `stage` field is informational only (e.g. an ADR is effectively `accepted` / `superseded`); the board aggregates by PRD stage and ignores them, just as it ignores BACKLOG.
 
 ## Document-volume scaling strategy
 
