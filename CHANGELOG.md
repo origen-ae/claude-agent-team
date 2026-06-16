@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project uses [Semantic Versioning](https://semver.org/).
 
+## [1.11.1] - 2026-06-16
+
+### Fixed
+Two bugs surfaced by running a multi-PRD board (several requirements at once):
+- **`check_state` / State warnings false-positives on cancelled & superseded**: these terminal off-ramps were flagged for "missing SPEC/TEST-PLAN" even though a dropped or replaced requirement legitimately may never have had them. They're now excluded from the past-stage artifact invariants (a genuinely jumped-ahead PRD is still flagged).
+- **Superseded leaked into "In progress"** on the dashboard (markdown + HTML counts): superseded is now excluded, like cancelled — it only shows under "Cancelled / Superseded".
+- Added a CI regression assertion covering both (cancelled/superseded not flagged; jumped-ahead flagged).
+
 ## [1.11.0] - 2026-06-16
 
 ### Fixed

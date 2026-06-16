@@ -78,7 +78,27 @@ jobs:
           assert guard('frontend', 'src/frontend/App.tsx') == 0, 'guard should allow frontend->frontend'
           assert guard(None, 'src/backend/api.py') == 0, 'guard should allow when agent unknown (fail open)'
           assert guard('frontend', 'src/backendish/x.ts') == 0, 'guard should not false-positive on backendish'
-          print('scripts ran clean; STATUS non-empty; next_id=PRD-002; path guard blocks/allows correctly')
+
+          # Regression (found via multi-PRD testing): cancelled/superseded must
+          # NOT be flagged for a missing SPEC/TEST-PLAN (they're terminal
+          # off-ramps); a jumped-ahead requirement MUST be flagged.
+          reg = Path(tempfile.mkdtemp())
+          shutil.copytree('assets/scripts', reg / 'scripts')
+          (reg / 'docs' / 'prd').mkdir(parents=True)
+          def wprd(rid, stage, extra=''):
+              (reg / 'docs' / 'prd' / f'{rid}.md').write_text(
+                  f'---\nid: {rid}\ntitle: t\ntype: prd\nstage: {stage}\nowner: pm\n'
+                  f'created: 2026-01-01\nupdated: 2026-01-01\nsummary: s\n{extra}---\n', encoding='utf-8')
+          wprd('PRD-001', 'cancelled', 'cancelled-reason: dropped\n')
+          wprd('PRD-002', 'superseded', 'superseded-by: PRD-003\n')
+          wprd('PRD-003', 'testing-round1')   # jumped ahead: no SPEC/TEST-PLAN
+          sys.path.insert(0, str(reg / 'scripts'))
+          import build_status as bs
+          warns = ' '.join(m for _, m in bs.compute_state_warnings(bs.group_by_requirement(bs.load_all_docs())))
+          assert 'PRD-001' not in warns and 'PRD-002' not in warns, f'cancelled/superseded falsely flagged: {warns}'
+          assert 'PRD-003' in warns, f'jumped-ahead PRD not flagged: {warns}'
+
+          print('scripts ran clean; STATUS non-empty; next_id=PRD-002; path guard ok; state-warning regression ok')
           PY
 
       - name: Validate document frontmatter

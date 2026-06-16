@@ -226,6 +226,12 @@ def compute_state_warnings(groups):
             warnings.append(("error", f"PRD-{rid}: unknown stage '{stage}'"))
             continue
 
+        # cancelled / superseded are terminal off-ramps: a dropped or replaced
+        # requirement legitimately may never have had a SPEC / TEST-PLAN, so the
+        # "past architecture/testing without the artifact" invariants don't apply.
+        if stage in ("cancelled", "superseded"):
+            continue
+
         # Past architecture but no SPEC doc exists.
         if idx > arch_idx and "spec" not in g:
             warnings.append(("error", f"PRD-{rid}: stage '{stage}' is past architecture but SPEC-{rid} is missing"))
@@ -324,7 +330,7 @@ def render_markdown(groups):
     # Currently in progress
     in_progress = [
         (rid, g) for rid, g in groups.items()
-        if get_canonical_stage(g) not in ("deployed", "cancelled", "pending")
+        if get_canonical_stage(g) not in ("deployed", "cancelled", "superseded", "pending")
         and not get_canonical_stage(g).startswith("awaiting-")
     ]
     if in_progress:
@@ -446,7 +452,7 @@ def render_html(groups):
     awaiting_count = sum(all_stages[s] for s in all_stages if s.startswith("awaiting-"))
     in_progress_count = sum(
         all_stages[s] for s in all_stages
-        if s not in ("deployed", "cancelled", "pending") and not s.startswith("awaiting-")
+        if s not in ("deployed", "cancelled", "superseded", "pending") and not s.startswith("awaiting-")
     )
     done_count = all_stages.get("deployed", 0)
 
