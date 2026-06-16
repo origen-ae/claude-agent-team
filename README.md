@@ -2,6 +2,8 @@
 
 # 🤖 Claude Agent Team
 
+**English** · [简体中文](README.zh-CN.md)
+
 > A ready-to-run agent team for Claude Code — PM, architect, frontend, backend & QA working through an 8-stage serial workflow with human approval gates, a shared document system (PRD/SPEC/TEST-PLAN/ADR/RUNBOOK/BACKLOG), and an auto-generated progress dashboard.
 
 [![GitHub stars](https://img.shields.io/github/stars/origen-ae/claude-agent-team?style=social)](https://github.com/origen-ae/claude-agent-team/stargazers)
